@@ -589,3 +589,104 @@ $ git log --oneline -1 --stat
   Actions", the daily refresh is live.
 - Nobody has opened the site in a real browser.
 - `data/eval_sample.csv` still needs 50 posts hand-labelled.
+
+---
+
+## Phase 10 — login wall with Google Sign-In (2026-11-17)
+
+### The decision I pushed back on first
+
+The ask was a login page taking a username and password "with gmail account".
+You cannot do that: collecting someone's Gmail password in your own form is
+phishing, Google blocks it, and it hands you a credential you should never
+hold. The legitimate equivalent is Sign in with Google, where Google shows its
+own password screen and the app receives a signed token instead.
+
+I also flagged that a hard login wall means a reviewer has to authenticate
+before they can look at the work, and recommended optional sign-in. That was
+overruled, which is a fair call to make. I built the wall, with one safeguard:
+if VITE_GOOGLE_CLIENT_ID is not configured, the wall shows a labelled way
+through instead of bricking the site. An unconfigured deploy would otherwise be
+a locked door with no key, two days before a deadline.
+
+### What was built
+
+backend/api/auth.py verifies Google ID tokens with google-auth — signature
+against Google's published keys, `aud` equal to our own client id, `iss`, `exp`
+and `email_verified`. No new dependency: google-auth already arrives with
+google-genai, now pinned explicitly. REQUIRE_AUTH gates /api/jobs,
+/api/jobs/{id} and /api/meta; /api/health and the new /api/auth/config stay
+open so a health probe and the login screen both still work. Optional
+ALLOWED_EMAILS allowlist.
+
+frontend/src/hooks/useAuth.js loads Google Identity Services, renders Google's
+own button, keeps the token in localStorage, pushes it into api.js so no
+component threads it through calls, and signs the user out on expiry.
+LoginPage.jsx is the wall; UserChip.jsx is the signed-in header menu.
+
+30 new backend tests, 104 total.
+
+### What broke, and the fix
+
+**1. The gate leaked the entire dataset before login.** This is the one worth
+telling. The wall rendered correctly — no board, no cards, no filters — but the
+jsdom check reported "no job data was fetched -> data/jobs.json,
+data/run_meta.json". All 527 KB arrived BEFORE sign-in.
+
+Cause: App.jsx fetched run metadata on mount to show a job count on the login
+screen, and in static mode fetchMeta() shares its loader with the job data, so
+asking for one pulled both. The board was hidden while the network tab showed
+every job — exactly the kind of gap that makes a login look like theatre.
+
+Fixed by gating the metadata fetch on `unlocked` and dropping the count from the
+login screen, since there is now no number to show before sign-in. Re-ran:
+"no job data was fetched -> nothing". A signed-out visitor now makes zero data
+requests.
+
+**2. An expired token left the page looking signed in.** Google ID tokens last
+about an hour. A stale one in localStorage unlocked the UI, and then every
+request 401'd. Now the hook checks `exp` on restore, schedules a sign-out for
+the moment it expires, and api.js tags 401 responses with a status so App can
+tell "your session ended" from "the server is broken" and sign out rather than
+show an error.
+
+**3. Google's avatar URLs 403'd.** Google's CDN rejects image requests that
+carry our origin as the referrer, so the avatar silently failed. Needs
+referrerPolicy="no-referrer" on the img, which there is now a test for.
+
+### Real output
+
+    $ cd backend && python -m pytest -q
+    104 passed
+
+    $ node login-check.mjs configured          # signed out
+    PASS  login wall is shown
+    PASS  job board is NOT rendered
+    PASS  no job data was fetched  -> nothing
+    PASS  no password field anywhere
+    PASS  no text input at all on the wall
+    PASS  Google's script was requested
+    PASS  no bypass offered
+
+    $ node login-check.mjs configured          # signed in, then out
+    PASS  user chip shown / name from the token -> A Student
+    PASS  sign out returns to the wall
+    PASS  sign out clears storage
+    PASS  expired token does not unlock
+    ALL LOGIN CHECKS PASSED   (both unconfigured and configured builds)
+
+### The limitation I am not going to paper over
+
+This protects the API. It cannot protect the statically published dataset,
+because on GitHub Pages data/jobs.json is a public file that anyone can request
+directly. There, the wall gates the interface, not the data. Making it
+load-bearing means deploying the API with REQUIRE_AUTH=true and pointing
+VITE_API_BASE at it. The code and the README both say this plainly rather than
+implying the static build is secured.
+
+### Still open
+
+- Needs a Google OAuth client id from Google Cloud Console before the sign-in
+  button can appear.
+- Repo is committed locally but still not pushed.
+- 50 posts still need hand-labelling.

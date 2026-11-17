@@ -11,3 +11,7 @@ uvicorn==0.54.0
 # httpx is what fastapi's TestClient runs requests through, so the API
 # tests need it present in CI, not just locally.
 httpx==0.28.1
+
+# Google Sign-In token verification. Already arrives with google-genai,
+# but pinned explicitly because api/auth.py imports it directly.
+google-auth==2.60.0

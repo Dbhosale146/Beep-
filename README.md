@@ -192,6 +192,48 @@ Internal fields are prefixed `_` and stripped before any response, and the list
 endpoint sends a 300-character snippet instead of the full 1,200, which is
 about a third of the payload for a page of results.
 
+### authentication — `backend/api/auth.py`, `frontend/src/hooks/useAuth.js`
+Google Sign-In. The app has **no password field anywhere**, deliberately:
+asking for someone's Gmail password in our own form is phishing, Google blocks
+it, and it would hand us a credential we have no business holding. Google shows
+its own sign-in screen and returns an ID token — a JWT it signed.
+
+The API verifies that token with `google-auth`, which checks:
+
+- the RS256 signature against Google's published keys (fetched and cached, so a
+  rotated key is picked up automatically)
+- `aud` equals our own client id — without this, a token minted for *any* other
+  Google app would be accepted here
+- `iss` is accounts.google.com, and `exp` has not passed
+- `email_verified` is true, since a Google account can carry an unverified address
+
+None of that is forgeable in the browser, because the browser does not hold
+Google's signing key. That is what makes it real authentication rather than
+decoration.
+
+| env var | effect |
+|---|---|
+| `GOOGLE_CLIENT_ID` | the client id tokens must be addressed to (required) |
+| `REQUIRE_AUTH=true` | `/api/jobs`, `/api/jobs/{id}` and `/api/meta` refuse anonymous callers |
+| `ALLOWED_EMAILS` | optional allowlist; without it any Google account may sign in |
+
+`/api/health` and `/api/auth/config` stay open either way — a host's health
+probe has no token, and the login screen has to load before anyone has one.
+
+**The honest limitation.** This protects the API. It cannot protect the
+statically published dataset: on GitHub Pages `data/jobs.json` is a public file,
+so there the login wall gates the *interface*, not the data. What it does do
+correctly is fetch nothing at all until sign-in — with a client id configured,
+a signed-out visitor triggers zero data requests. To make the gate load-bearing
+over the data, deploy the API with `REQUIRE_AUTH=true` and point
+`VITE_API_BASE` at it.
+
+Client-side, `useAuth` decodes the token's payload only to show a name and
+avatar, and the code says so: a JWT payload is just base64 and anyone can write
+one. Nothing is trusted on the strength of it — the token still has to satisfy
+the server. Tokens live about an hour; the hook signs the user out when one
+expires rather than leaving a signed-in header above failing requests.
+
 ### frontend — `frontend/`
 React 19 + Vite. No router, no state library, no UI kit, no animation library.
 

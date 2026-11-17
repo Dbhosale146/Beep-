@@ -20,9 +20,10 @@ import json
 import os
 from datetime import datetime, timedelta, timezone
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from api.auth import auth_required, client_id, current_user
 from pipeline.config import data_path
 
 app = FastAPI(
@@ -40,8 +41,8 @@ origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", default_origins).sp
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_methods=["GET"],
-    allow_headers=["*"],
+    allow_methods=["GET", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # ---------------------------------------------------------------- loading
@@ -181,7 +182,11 @@ def _desc(dt):
 
 @app.get("/api/health")
 def health():
-    """Cheap endpoint for a deploy platform's health check."""
+    """Cheap endpoint for a deploy platform's health check.
+
+    Deliberately open even when REQUIRE_AUTH is on: a host's health probe has
+    no token, and locking this out would make the service look dead.
+    """
     jobs = _load()
     return {
         "status": "ok",
@@ -191,8 +196,27 @@ def health():
     }
 
 
+@app.get("/api/auth/config")
+def auth_config():
+    """What the frontend needs to know before showing a login screen.
+
+    The client id is public by design -- it identifies the app in Google's
+    consent screen and is visible in the browser either way. The secret that
+    matters is Google's signing key, which only Google has.
+    """
+    return {"configured": bool(client_id()), "required": auth_required()}
+
+
+@app.get("/api/me")
+def me(user: dict | None = Depends(current_user)):
+    """Who the caller is, according to their Google token."""
+    if user is None:
+        raise HTTPException(status_code=401, detail="not signed in")
+    return user
+
+
 @app.get("/api/meta")
-def meta():
+def meta(user: dict | None = Depends(current_user)):
     """Pipeline run metadata: counts per source, dedup layers, tokens, facets."""
     _load()
     return _cache["meta"]
@@ -208,6 +232,7 @@ def list_jobs(
     sort: str = Query("recent", pattern="^(recent|oldest|company|title)$"),
     page: int = Query(1, ge=1),
     page_size: int = Query(24, ge=1, le=100),
+    user: dict | None = Depends(current_user),
 ):
     """One page of matching jobs, plus the facet counts for the filter menus."""
     jobs = _load()
@@ -252,7 +277,7 @@ def list_jobs(
 
 
 @app.get("/api/jobs/{job_id}")
-def get_job(job_id: str):
+def get_job(job_id: str, user: dict | None = Depends(current_user)):
     """One job with its full description."""
     _load()
     job = _cache["by_id"].get(job_id)

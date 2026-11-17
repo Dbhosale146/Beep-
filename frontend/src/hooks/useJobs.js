@@ -31,7 +31,9 @@ export function useJobs(filters, { skip = false } = {}) {
         setError(null);
       })
       .catch((e) => {
-        if (e.name !== "AbortError") setError(e.message);
+        // Keep the Error itself, not just its text: App needs e.status to
+        // tell an expired session (401) apart from a broken server.
+        if (e.name !== "AbortError") setError(e);
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);

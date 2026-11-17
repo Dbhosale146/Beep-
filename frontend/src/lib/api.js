@@ -20,6 +20,14 @@ export const USING_API = Boolean(BASE);
 
 export const PAGE_SIZE = 24;
 
+// The Google ID token, kept here so no component has to thread it through
+// every call. useAuth keeps this in step with the session.
+let authToken = null;
+
+export function setAuthToken(token) {
+  authToken = token || null;
+}
+
 // Where the static build finds the pipeline's output. Relative, because the
 // site is served from a /<repo>/ path on GitHub Pages.
 const LOCAL_JOBS = "data/jobs.json";
@@ -41,7 +49,8 @@ function url(path, params) {
 }
 
 async function getJson(target, signal) {
-  const response = await fetch(target, { signal });
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : undefined;
+  const response = await fetch(target, { signal, headers });
   if (!response.ok) {
     // The API sends {"detail": "..."} on an error. Surface that text if it is
     // there, because "data/jobs.json is missing, run the pipeline" is a far
@@ -53,9 +62,20 @@ async function getJson(target, signal) {
     } catch {
       // Not JSON. Keep the status line.
     }
-    throw new Error(detail);
+    const error = new Error(detail);
+    // Carried so the caller can tell "your session ended" apart from "the
+    // server is broken", and sign the user out instead of showing an error.
+    error.status = response.status;
+    throw error;
   }
   return response.json();
+}
+
+// Whether the API itself demands a signed-in caller. Served unauthenticated so
+// the login screen can load before anyone has a token.
+export function fetchAuthConfig(signal) {
+  if (!USING_API) return Promise.resolve({ configured: false, required: false });
+  return getJson(`${BASE}/auth/config`, signal);
 }
 
 // ---------------------------------------------------------------- local mode

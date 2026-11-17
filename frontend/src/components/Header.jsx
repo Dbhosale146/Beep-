@@ -5,7 +5,9 @@ import { formatDateTime } from "../lib/format.js";
 //   - two blurred gradient blobs drift slowly behind the text (CSS only)
 //   - the title and subtitle rise into place on load, staggered
 //   - the job count counts up from zero
-export default function Header({ total, refreshed, sources }) {
+//
+// `action` is the top-right slot, which App fills with the signed-in user.
+export default function Header({ total, refreshed, sources, action }) {
   const count = useCountUp(total || 0);
   const when = formatDateTime(refreshed);
 
@@ -16,10 +18,13 @@ export default function Header({ total, refreshed, sources }) {
       <div className="hero-blob hero-blob-b" aria-hidden="true" />
 
       <div className="hero-inner">
-        <span className="hero-eyebrow rise" style={{ "--d": "0ms" }}>
-          <span className="live-dot" aria-hidden="true" />
-          Refreshed daily from public job-board APIs
-        </span>
+        <div className="hero-top">
+          <span className="hero-eyebrow rise" style={{ "--d": "0ms" }}>
+            <span className="live-dot" aria-hidden="true" />
+            Refreshed daily from public job-board APIs
+          </span>
+          {action}
+        </div>
 
         <h1 className="hero-title rise" style={{ "--d": "70ms" }}>
           Fresher jobs &amp; internships

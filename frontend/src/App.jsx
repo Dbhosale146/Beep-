@@ -4,11 +4,14 @@ import EmptyState from "./components/EmptyState.jsx";
 import FilterBar from "./components/FilterBar.jsx";
 import Header from "./components/Header.jsx";
 import JobCard from "./components/JobCard.jsx";
+import LoginPage from "./components/LoginPage.jsx";
 import JobPanel from "./components/JobPanel.jsx";
 import Pagination from "./components/Pagination.jsx";
 import ProgressBar from "./components/ProgressBar.jsx";
 import SearchBar from "./components/SearchBar.jsx";
 import SkeletonGrid from "./components/SkeletonGrid.jsx";
+import UserChip from "./components/UserChip.jsx";
+import { useAuth } from "./hooks/useAuth.js";
 import { useJobs } from "./hooks/useJobs.js";
 import { useSaved } from "./hooks/useSaved.js";
 import { readUrl, useUrlState } from "./hooks/useUrlState.js";
@@ -29,8 +32,23 @@ export default function App() {
 
   const { saved, isSaved, toggle } = useSaved();
 
+  const auth = useAuth();
+  // Escape hatch for the case where Google Sign-In has not been configured
+  // yet: without it an unconfigured deploy would be a locked door with no key,
+  // and the published site would show nothing at all.
+  const [bypass, setBypass] = useState(false);
+  const unlocked = auth.signedIn || bypass;
+
   // The Saved tab renders from local storage, so skip the request entirely.
-  const { data, loading, error } = useJobs(filters, { skip: tab === "saved" });
+  const { data, loading, error } = useJobs(filters, {
+    skip: tab === "saved" || !unlocked,
+  });
+
+  // An expired token is not an error to show the user -- it just means the
+  // session is over, so drop them back to the login screen.
+  useEffect(() => {
+    if (error?.status === 401) auth.signOut();
+  }, [error, auth.signOut]);
 
   // Debounce the search box: wait until typing pauses for 300ms before asking
   // the server. Without this, "developer" is nine requests.
@@ -42,11 +60,18 @@ export default function App() {
 
   // Run metadata is nice to have, not essential, so a failure here must not
   // take the page down with it.
+  //
+  // Gated on `unlocked` deliberately. In static mode fetchMeta shares its
+  // loader with the job data, so calling it before sign-in would pull the
+  // whole dataset down behind the login wall -- the board would be hidden
+  // while the network tab showed every job. Nothing is requested until the
+  // gate opens.
   useEffect(() => {
+    if (!unlocked) return;
     fetchMeta()
       .then(setMeta)
       .catch(() => setMeta(null));
-  }, []);
+  }, [unlocked]);
 
   const anyActive = Boolean(
     filters.q || filters.role || filters.city || filters.source || filters.within !== "0",
@@ -71,6 +96,14 @@ export default function App() {
     ? Object.keys(meta.counts_per_source_published).length
     : null;
 
+  // Every hook above runs unconditionally; the gate is only about what we
+  // render. Returning early before a hook would break the hook order.
+  if (!unlocked) {
+    return (
+      <LoginPage auth={auth} onSkip={() => setBypass(true)} />
+    );
+  }
+
   return (
     <div className="app">
       <ProgressBar active={loading && tab === "all"} />
@@ -79,6 +112,9 @@ export default function App() {
         total={data?.total_unfiltered}
         refreshed={data?.last_refreshed || meta?.last_refreshed}
         sources={sourceCount}
+        action={
+          auth.user ? <UserChip user={auth.user} onSignOut={auth.signOut} /> : null
+        }
       />
 
       <div className="sticky">
@@ -110,7 +146,7 @@ export default function App() {
         {error && tab === "all" && (
           <div className="banner pop-in">
             <strong>Could not reach the API.</strong>
-            <span className="mono">{error}</span>
+            <span className="mono">{error.message}</span>
             <span className="banner-hint">
               Start it with: <code>uvicorn api.main:app --reload --port 8000</code>
             </span>
