@@ -1,0 +1,21 @@
+# secrets. No leading slash, so this matches backend/.env too.
+.env
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# node / vite
+frontend/node_modules/
+frontend/dist/
+# copied from backend/data at build time by scripts/sync-data.mjs
+frontend/public/data/
+
+# intermediate pipeline output. The published files (jobs.json, run_meta.json,
+# tag_cache.json, usage_log.jsonl) ARE committed by the daily workflow, because
+# the API serves them and the site needs them to exist on a fresh checkout.
+backend/data/raw_jobs.json
+backend/data/normalised_jobs.json

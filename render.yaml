@@ -1,0 +1,22 @@
+# Deploy blueprint for the API (render.com). The frontend is a static build
+# and goes to GitHub Pages from .github/workflows/daily.yml; this file is only
+# for the Python service.
+#
+# rootDir matters: the API imports pipeline.config, so it has to run from
+# backend/ where that package and the data files live.
+services:
+  - type: web
+    name: beep-jobs-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # $PORT is assigned by the host. Binding 0.0.0.0 rather than 127.0.0.1 is
+    # what makes the service reachable from outside its container.
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      # The GitHub Pages origin, so the browser is allowed to call this API.
+      # Set in the dashboard, not here, because it is deployment-specific.
+      - key: CORS_ORIGINS
+        sync: false

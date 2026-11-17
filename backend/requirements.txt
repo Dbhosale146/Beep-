@@ -1,0 +1,13 @@
+# Pinned so GitHub Actions runs what I tested on 2026-11-16.
+requests==2.34.2
+PyYAML==6.0.3
+rapidfuzz==3.14.6
+google-genai==3.3.0
+pytest==9.0.3
+
+# API layer (added 2026-11-17). Versions are what I installed and tested with.
+fastapi==0.163.1
+uvicorn==0.54.0
+# httpx is what fastapi's TestClient runs requests through, so the API
+# tests need it present in CI, not just locally.
+httpx==0.28.1

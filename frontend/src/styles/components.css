@@ -1,0 +1,1001 @@
+/* Styles for each component, in the order they appear on the page. */
+
+/* ---------- top progress bar ---------- */
+
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  height: 2.5px;
+  opacity: 0;
+  transition: opacity var(--mid) var(--ease);
+  pointer-events: none;
+}
+
+.progress.is-on {
+  opacity: 1;
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--teal), transparent);
+  animation: bar-sweep 1.1s ease-in-out infinite;
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 54px 0 30px;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Two big blurred colour fields drifting behind the text. Pointer-events off
+   so they never intercept a click. */
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.4;
+  pointer-events: none;
+  animation: drift 20s ease-in-out infinite;
+}
+
+.hero-blob-a {
+  top: -130px;
+  left: -60px;
+  width: 340px;
+  height: 340px;
+  background: var(--accent);
+}
+
+.hero-blob-b {
+  top: -90px;
+  right: -40px;
+  width: 300px;
+  height: 300px;
+  background: var(--teal);
+  animation-duration: 26s;
+  animation-direction: reverse;
+}
+
+@media (prefers-color-scheme: dark) {
+  .hero-blob {
+    opacity: 0.26;
+  }
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 5px 13px 5px 10px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(8px);
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  color: var(--teal);
+  background: var(--teal);
+  animation: ping 2.4s ease-out infinite;
+}
+
+.hero-title {
+  font-size: clamp(1.85rem, 5vw, 3.1rem);
+  font-weight: 700;
+}
+
+.hero-accent {
+  /* Gradient text: the gradient is painted on the background and then clipped
+     to the glyphs. -webkit- prefix is still needed for Safari. */
+  background: linear-gradient(100deg, var(--accent), var(--teal));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-sub {
+  margin-top: 12px;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.hero-count {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  /* Tabular figures stop the width jittering while the number counts up. */
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-when {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* ---------- sticky search + filters ---------- */
+
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 12px 0;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(12px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ---------- tabs ---------- */
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 15px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  transition:
+    color var(--fast) var(--ease),
+    background var(--fast) var(--ease);
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab.is-on {
+  color: var(--text);
+  font-weight: 600;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.tab-badge {
+  min-width: 18px;
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border-radius: var(--radius-pill);
+}
+
+/* ---------- search field ---------- */
+
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 280px;
+  min-width: 0;
+  padding: 0 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition:
+    border-color var(--fast) var(--ease),
+    box-shadow var(--fast) var(--ease);
+}
+
+.search.is-focused {
+  border-color: var(--accent);
+  box-shadow: var(--ring);
+}
+
+.search-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 10px;
+  font: inherit;
+  font-size: 0.925rem;
+  color: var(--text);
+  background: none;
+  border: none;
+  outline: none;
+}
+
+/* Hide the browser's own clear button; we render our own. */
+.search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.search-kbd {
+  padding: 2px 7px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.search-spinner {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 650ms linear infinite;
+}
+
+.search-clear {
+  padding: 0 4px;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  transition: color var(--fast) var(--ease);
+}
+
+.search-clear:hover {
+  color: var(--text);
+}
+
+/* ---------- sort ---------- */
+
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.sort-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.sort select,
+.filter {
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    border-color var(--fast) var(--ease),
+    color var(--fast) var(--ease);
+}
+
+.sort select:hover,
+.filter:hover {
+  border-color: var(--border-strong);
+}
+
+/* A filter that is doing something should look different from one that is not. */
+.filter.is-active {
+  color: var(--accent-text);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 500;
+}
+
+/* ---------- filter row + chips ---------- */
+
+.filters {
+  margin-top: 10px;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px 4px 11px;
+  font-size: 0.8rem;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: var(--radius-pill);
+}
+
+.chip button {
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: inherit;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  opacity: 0.6;
+  transition:
+    opacity var(--fast) var(--ease),
+    background var(--fast) var(--ease);
+}
+
+.chip button:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.chips-clear {
+  padding: 4px 9px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--fast) var(--ease);
+}
+
+.chips-clear:hover {
+  color: var(--text);
+}
+
+/* ---------- results line ---------- */
+
+.results {
+  margin: 22px 0 14px;
+  font-size: 0.925rem;
+  color: var(--text-soft);
+}
+
+.results strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.results-of {
+  color: var(--text-muted);
+}
+
+/* ---------- error banner ---------- */
+
+.banner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 22px 0 0;
+  padding: 16px 18px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--rose) 9%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--rose) 32%, transparent);
+  border-radius: var(--radius);
+}
+
+.banner-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.banner code {
+  padding: 2px 6px;
+  font-size: 0.82rem;
+  background: var(--surface-2);
+  border-radius: 5px;
+}
+
+/* ---------- grid ---------- */
+
+.grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+}
+
+/* Keep the old results visible but dimmed while the next page loads, so the
+   page never flashes empty between keystrokes. */
+.grid.is-loading {
+  opacity: 0.45;
+  transition: opacity var(--fast) var(--ease);
+  pointer-events: none;
+}
+
+/* ---------- card ---------- */
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition:
+    transform var(--mid) var(--ease),
+    box-shadow var(--mid) var(--ease),
+    border-color var(--mid) var(--ease);
+}
+
+/* A hairline of the company's own colour down the left edge, which appears on
+   hover. Cheap way to make the grid feel responsive to the pointer. */
+.card::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: hsl(var(--hue, 250) 70% 58%);
+  opacity: 0;
+  transform: scaleY(0.4);
+  transition:
+    opacity var(--mid) var(--ease),
+    transform var(--mid) var(--ease);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg);
+}
+
+.card:hover::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.card-top {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: hsl(var(--hue, 250) 62% 38%);
+  background: hsl(var(--hue, 250) 72% 93%);
+  border-radius: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .avatar {
+    color: hsl(var(--hue, 250) 70% 78%);
+    background: hsl(var(--hue, 250) 38% 22%);
+  }
+}
+
+.avatar-lg {
+  width: 52px;
+  height: 52px;
+  font-size: 1rem;
+  border-radius: 14px;
+}
+
+.card-head {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-title {
+  font-size: 0.975rem;
+  font-weight: 600;
+}
+
+.card-title button {
+  padding: 0;
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  background: none;
+  border: none;
+  transition: color var(--fast) var(--ease);
+}
+
+.card:hover .card-title button {
+  color: var(--accent);
+}
+
+.card-company {
+  margin-top: 2px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.star {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  transition:
+    background var(--fast) var(--ease),
+    transform var(--fast) var(--ease);
+}
+
+.star svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  transition:
+    fill var(--fast) var(--ease),
+    stroke var(--fast) var(--ease);
+}
+
+.star:hover {
+  background: var(--surface-2);
+}
+
+.star:hover svg {
+  stroke: var(--star);
+}
+
+.star.is-saved svg {
+  fill: var(--star);
+  stroke: var(--star);
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.card-snippet {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  /* Three lines, then clip, so every card is the same height. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.card-source {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity var(--mid) var(--ease),
+    transform var(--mid) var(--ease);
+}
+
+.card-cta svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.card:hover .card-cta {
+  opacity: 1;
+  transform: none;
+}
+
+/* The CTA is hover-only, which leaves nothing for touch. Show it there. */
+@media (hover: none) {
+  .card-cta {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.card.skeleton {
+  cursor: default;
+  box-shadow: none;
+}
+
+.card.skeleton:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--border);
+}
+
+/* ---------- empty state ---------- */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 6px;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-radius: 50%;
+}
+
+.empty h3 {
+  font-size: 1.1rem;
+}
+
+.empty p {
+  max-width: 420px;
+  color: var(--text-muted);
+  font-size: 0.925rem;
+}
+
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+/* ---------- pagination ---------- */
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin: 34px 0 8px;
+}
+
+.pager-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  font-size: 0.875rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition:
+    border-color var(--fast) var(--ease),
+    transform var(--fast) var(--ease);
+}
+
+.pager-btn svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pager-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pager-btn:disabled {
+  color: var(--text-muted);
+  cursor: default;
+  opacity: 0.45;
+}
+
+.pager-nums {
+  display: flex;
+  gap: 4px;
+}
+
+.pager-num {
+  min-width: 34px;
+  padding: 8px 0;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-soft);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--fast) var(--ease),
+    color var(--fast) var(--ease);
+}
+
+.pager-num:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.pager-num.is-on {
+  color: #fff;
+  background: var(--accent);
+  font-weight: 600;
+}
+
+.pager-gap {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  color: var(--text-muted);
+}
+
+/* ---------- detail drawer ---------- */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(8, 10, 16, 0.5);
+  backdrop-filter: blur(3px);
+  animation: scrim-in var(--mid) var(--ease);
+}
+
+.drawer {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 28px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  animation: drawer-in var(--slow) var(--ease);
+}
+
+.drawer-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: none;
+  border-radius: 50%;
+  transition:
+    background var(--fast) var(--ease),
+    color var(--fast) var(--ease);
+}
+
+.drawer-close svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+}
+
+.drawer-close:hover {
+  color: var(--text);
+  background: var(--border);
+}
+
+.drawer-loading,
+.drawer-error {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 40px;
+}
+
+.drawer-error {
+  color: var(--rose);
+}
+
+.drawer-head {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin: 8px 36px 16px 0;
+}
+
+.drawer-title {
+  font-size: 1.3rem;
+  font-weight: 650;
+}
+
+.drawer-company {
+  margin-top: 4px;
+  color: var(--text-muted);
+}
+
+.drawer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 4px;
+}
+
+.drawer-facts {
+  display: grid;
+  gap: 1px;
+  margin: 22px 0 0;
+  overflow: hidden;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.drawer-facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 14px;
+  background: var(--surface);
+}
+
+.drawer-facts dt {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.drawer-facts dd {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: right;
+}
+
+.drawer-section {
+  margin: 26px 0 10px;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.drawer-desc {
+  font-size: 0.925rem;
+  color: var(--text-soft);
+  white-space: pre-wrap;
+}
+
+/* ---------- footer ---------- */
+
+.footer {
+  margin-top: 56px;
+  padding: 24px 0 40px;
+  border-top: 1px solid var(--border);
+  font-size: 0.825rem;
+  color: var(--text-muted);
+}
+
+.footer-dim {
+  margin-top: 5px;
+  opacity: 0.75;
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 34px 0 20px;
+  }
+
+  .bar {
+    gap: 8px;
+  }
+
+  /* Search gets its own full-width row above the tabs and sort. */
+  .search {
+    order: -1;
+    flex-basis: 100%;
+  }
+
+  .sort-label {
+    display: none;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .drawer {
+    max-width: 100%;
+    padding: 22px 18px;
+  }
+
+  .pager-nums {
+    display: none;
+  }
+}

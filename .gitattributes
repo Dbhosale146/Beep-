@@ -1,0 +1,11 @@
+# Normalise line endings in the repo so a Windows checkout does not show every
+# file as modified, and CI (Linux) sees the same bytes.
+* text=auto eol=lf
+
+# Data files the pipeline writes. Marked as generated so GitHub collapses them
+# in diffs -- a daily refresh otherwise buries real code changes.
+backend/data/jobs.json linguist-generated=true
+backend/data/run_meta.json linguist-generated=true
+backend/data/tag_cache.json linguist-generated=true
+backend/data/usage_log.jsonl linguist-generated=true
+frontend/package-lock.json linguist-generated=true

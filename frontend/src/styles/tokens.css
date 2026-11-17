@@ -1,0 +1,85 @@
+/* Design tokens. Every colour, radius and shadow in the app is defined once
+   here, so a theme change is a change to this file and nothing else.
+
+   Dark mode redefines the same names rather than adding new ones, which is why
+   no component needs to know which theme is active. */
+
+:root {
+  --bg: #f4f6fb;
+  --bg-grad-a: #eef1fa;
+  --bg-grad-b: #f7f5fb;
+
+  --surface: #ffffff;
+  --surface-2: #f3f5fa;
+  --surface-hover: #fbfcfe;
+
+  --text: #0f1420;
+  --text-soft: #42495c;
+  --text-muted: #6b7489;
+
+  --border: #e2e7f0;
+  --border-strong: #cfd6e4;
+
+  --accent: #5b4bf0;
+  --accent-hover: #4a39e6;
+  --accent-soft: #eceaff;
+  --accent-text: #4335c4;
+
+  --teal: #0ea5a5;
+  --amber: #f0a118;
+  --rose: #e04a63;
+
+  --star: #f0a118;
+
+  --radius: 14px;
+  --radius-sm: 9px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(18, 24, 40, 0.05);
+  --shadow: 0 4px 16px -4px rgba(18, 24, 40, 0.1), 0 1px 3px rgba(18, 24, 40, 0.05);
+  --shadow-lg: 0 18px 44px -12px rgba(18, 24, 40, 0.24);
+
+  --ring: 0 0 0 3px rgba(91, 75, 240, 0.22);
+
+  /* One easing curve for everything, so the whole UI moves the same way. */
+  --ease: cubic-bezier(0.22, 0.8, 0.3, 1);
+  --fast: 140ms;
+  --mid: 240ms;
+  --slow: 420ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #090b11;
+    --bg-grad-a: #0d1018;
+    --bg-grad-b: #0b0d14;
+
+    --surface: #13161f;
+    --surface-2: #1a1e29;
+    --surface-hover: #181c26;
+
+    --text: #e9ebf2;
+    --text-soft: #b6bdcd;
+    --text-muted: #8b94a8;
+
+    --border: #242936;
+    --border-strong: #333a4a;
+
+    --accent: #8578ff;
+    --accent-hover: #978cff;
+    --accent-soft: #1e1b3a;
+    --accent-text: #b7aeff;
+
+    --teal: #2dd4bf;
+    --amber: #fbbf24;
+    --rose: #fb7185;
+
+    --star: #fbbf24;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow: 0 4px 18px -4px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+
+    --ring: 0 0 0 3px rgba(133, 120, 255, 0.3);
+  }
+}

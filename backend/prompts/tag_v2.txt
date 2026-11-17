@@ -1,0 +1,36 @@
+You classify Indian fresher job and internship posts. You will be given a
+numbered list of posts. Return one object per post, in the same order, using
+the index number you were given.
+
+For each post decide three things.
+
+1. role -- the single best match from this list and nothing else:
+{ROLES}
+
+2. city -- the work location, from this list and nothing else:
+{CITIES}
+   Rules for city, in priority order:
+   - If the post names one city, answer that city, using the canonical name
+     exactly as written above. "Bangalore" is "Bengaluru". "Gurgaon" is
+     "Gurugram". "Trichy" is "Tiruchirappalli".
+   - A neighbourhood or suburb counts as its city: "Padmanabhnagar, Bangalore"
+     is "Bengaluru", "Powai" is "Mumbai".
+   - If only a state or the country is given with no city -- for example
+     "India", "Karnataka, India", "West Bengal" -- answer "Pan India".
+   - If the post is fully remote or work-from-home, answer "Remote".
+   - If the post names two or more different cities, answer "Multiple".
+   - If a single city is named but is genuinely not in the list above, answer
+     "Multiple" rather than inventing a name.
+
+3. is_fresher -- true only if this post is genuinely open to someone with no
+   more than one year of experience, or is an internship, apprenticeship,
+   trainee or new-graduate role. Set it to false for anything asking for two
+   or more years, and for senior, lead, staff, principal or manager roles,
+   even if the title contains the word "intern" as part of another word such
+   as "internal".
+
+Judge only from the text given. Do not use outside knowledge about the
+company. Do not guess at a value you cannot support from the post.
+
+Posts:
+{POSTS}

@@ -1,0 +1,69 @@
+# Company job-board tokens, one list per source.
+# Every token below was verified live on 2026-11-16: the board responded 200
+# AND returned at least one job with "India" in its location.
+# Re-check with: python scripts/verify_companies.py
+
+greenhouse:
+  - token: okta
+    name: Okta
+  - token: databricks
+    name: Databricks
+  - token: gitlab
+    name: GitLab
+  - token: sigmoid
+    name: Sigmoid
+  - token: netradyne
+    name: Netradyne
+  - token: elastic
+    name: Elastic
+  - token: twilio
+    name: Twilio
+  - token: druva
+    name: Druva
+  - token: coinbase
+    name: Coinbase
+  - token: groww
+    name: Groww
+  - token: datadog
+    name: Datadog
+  - token: zscaler
+    name: Zscaler
+  - token: stripe
+    name: Stripe
+  - token: newrelic
+    name: New Relic
+  - token: figma
+    name: Figma
+  - token: duolingo
+    name: Duolingo
+  - token: mongodb
+    name: MongoDB
+  - token: workato
+    name: Workato
+
+# Valid Greenhouse boards that had NO India jobs on 2026-11-16.
+# Boards change daily, so they are kept here ready to re-enable.
+# greenhouse_no_india_today:
+#   slice, cloudflare, dropbox, reddit, discord, robinhood, airtable
+
+# Lever. Verified live 2026-11-16 using the posting's `country` field == "IN".
+# Boards that responded but had zero India jobs: porter, hevo.
+lever:
+  - token: paytm
+    name: Paytm
+  - token: meesho
+    name: Meesho
+  - token: zeta
+    name: Zeta
+  - token: mindtickle
+    name: MindTickle
+  - token: fampay
+    name: FamPay
+  - token: cred
+    name: CRED
+
+# Ashby. Verified live 2026-11-16 via address.postalAddress.addressCountry.
+# Boards that responded but had zero India jobs: navi, ditto.
+ashby:
+  - token: atlan
+    name: Atlan

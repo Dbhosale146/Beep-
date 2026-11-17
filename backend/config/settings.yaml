@@ -1,0 +1,65 @@
+# Tunables that are not secrets. Secrets come from env vars only.
+
+http:
+  timeout_seconds: 20
+  retries: 3           # retries AFTER the first attempt
+  backoff_seconds: 2   # doubles each retry
+  user_agent: "beep-fresher-jobs/0.1 (job aggregator; contact via repo issues)"
+
+llm:
+  # Google Gemini via the google-genai SDK. Verified against the live docs and
+  # the installed SDK (google-genai 3.3.0) on 2026-11-16.
+  provider: google-gemini
+  api_key_env: GEMINI_API_KEY
+
+  # Flash family. Flash-Lite is the cheapest and the Gemini docs name it for
+  # exactly our job: "high-volume data analysis and document extraction,
+  # structured JSON parsing". Swap to gemini-3.6-flash (5x the price) if
+  # accuracy on the 50-post eval comes in short.
+  model: gemini-3.5-flash-lite
+
+  batch_size: 10       # posts per LLM call
+  max_retries: 1       # one retry on invalid JSON, then mark Untagged
+
+  # temperature is NOT a top-level argument on interactions.create();
+  # it goes inside generation_config. thinking_level defaults to "minimal"
+  # on Flash-Lite, and we pin it: thinking tokens bill at the output rate and
+  # a fixed-taxonomy classification does not need reasoning.
+  generation_config:
+    temperature: 0
+    thinking_level: minimal
+
+  # Documented list prices per 1M tokens, 2026-11-16. These are defaults for
+  # reference only: scripts/cost_report.py takes prices as arguments so the
+  # number in my writeup is always computed from prices I pass in.
+  prices_usd_per_million:
+    input: 0.30
+    output: 2.50
+
+paths:
+  raw: data/raw_jobs.json
+  normalised: data/normalised_jobs.json
+  jobs: data/jobs.json
+  run_meta: data/run_meta.json
+  tag_cache: data/tag_cache.json
+  usage_log: data/usage_log.jsonl
+
+adzuna:
+  # Adzuna India search. Verified live 2026-11-16: "intern" alone returns
+  # 2,051 hits in the last 30 days, so this is the volume source.
+  country: in
+  results_per_page: 50   # 50 is Adzuna's documented maximum
+  max_pages: 6
+  max_days_old: 30
+  queries:               # one paged search per query, results pooled then deduped
+    - intern
+    - internship
+    - fresher
+    - graduate trainee
+    - trainee
+    - entry level
+    - campus hire
+
+export:
+  description_chars: 1200   # what we keep for the frontend
+  llm_description_chars: 600  # what we send to Gemini; directly drives cost

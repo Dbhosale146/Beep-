@@ -1,0 +1,253 @@
+/* Resets, page frame and shared primitives (buttons, pills, skeleton blocks). */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  /* Two very soft radial washes, so the page is not a flat slab of grey. */
+  background-image:
+    radial-gradient(900px 500px at 12% -8%, var(--bg-grad-a), transparent 70%),
+    radial-gradient(800px 460px at 92% -4%, var(--bg-grad-b), transparent 68%);
+  background-attachment: fixed;
+  color: var(--text);
+  font: 15.5px/1.6 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+}
+
+/* Centred column shared by the header, sticky bar, results and footer, so
+   everything lines up on one grid. */
+.shell {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition:
+    background var(--fast) var(--ease),
+    border-color var(--fast) var(--ease),
+    transform var(--fast) var(--ease),
+    box-shadow var(--fast) var(--ease);
+}
+
+.btn:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.btn-primary {
+  color: #fff;
+  background: var(--accent);
+  border-color: transparent;
+  box-shadow: 0 6px 18px -6px var(--accent);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: transparent;
+  box-shadow: 0 10px 24px -8px var(--accent);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-muted);
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+  background: var(--surface-2);
+  box-shadow: none;
+}
+
+.btn-saved {
+  color: var(--star);
+  border-color: var(--star);
+  background: transparent;
+}
+
+/* ---------- pills ---------- */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.pill svg {
+  width: 11px;
+  height: 11px;
+  fill: currentColor;
+  opacity: 0.75;
+}
+
+.pill-city {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.pill-role {
+  color: var(--teal);
+  background: color-mix(in srgb, var(--teal) 13%, transparent);
+}
+
+.pill-date.is-fresh {
+  color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 15%, transparent);
+}
+
+.fresh-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: ping 2s ease-out infinite;
+}
+
+/* ---------- skeleton blocks ---------- */
+
+.sk {
+  border-radius: 7px;
+  /* The band that sweeps across is a gradient wider than the element, moved
+     by background-position. Cheaper than animating a pseudo-element. */
+  background-image: linear-gradient(
+    90deg,
+    var(--surface-2) 0%,
+    color-mix(in srgb, var(--surface-2) 55%, var(--surface)) 50%,
+    var(--surface-2) 100%
+  );
+  background-size: 220% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.sk-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  flex: 0 0 auto;
+}
+
+.sk-head {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sk-title {
+  height: 15px;
+  width: 72%;
+}
+
+.sk-company {
+  height: 11px;
+  width: 45%;
+}
+
+.sk-line {
+  height: 10px;
+  width: 100%;
+}
+
+.sk-line.short {
+  width: 58%;
+}
+
+.sk-tags {
+  display: flex;
+  gap: 6px;
+}
+
+.sk-pill {
+  height: 20px;
+  width: 64px;
+  border-radius: var(--radius-pill);
+}
+
+.sk-pill.wide {
+  width: 104px;
+}

@@ -1,0 +1,53 @@
+# Keyword rules for the fresher filter. Applied BEFORE the LLM, which also
+# returns is_fresher so leaks can be dropped afterwards.
+#
+# Every pattern is matched with word boundaries (\b...\b). This matters:
+# a substring match on "intern" also matches "Senior Internal Auditor",
+# which is how I got 2 false positives out of 4 hits in phase 1.
+
+# A title hit here is a strong yes.
+title_positive:
+  - intern
+  - interns
+  - internship
+  - internships
+  - trainee
+  - trainees
+  - fresher
+  - freshers
+  - apprentice
+  - apprenticeship
+  - graduate engineer
+  - graduate trainee
+  - management trainee
+  - new grad
+  - new graduate
+  - campus hire
+  - entry level
+  - summer analyst
+  - early career
+
+# A title hit here is a hard no, even if a positive also matched.
+# "Senior Internship Program Manager" is not a fresher role.
+title_negative:
+  - senior
+  - sr
+  - staff
+  - principal
+  - lead
+  - manager
+  - head
+  - director
+  - vp
+  - vice president
+  - chief
+  - architect
+  - specialist
+  - expert
+  - consultant
+  - ii
+  - iii
+  - iv
+
+# If the description states a minimum years-of-experience above this, drop it.
+max_years_experience: 1

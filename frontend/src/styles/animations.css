@@ -1,0 +1,202 @@
+/* Every animation in the app, in one file.
+
+   Keeping them together means you can see the whole motion vocabulary at once,
+   and the reduced-motion switch at the bottom turns all of it off in one
+   place rather than per component. */
+
+/* Cards and sections rising into view. `--i` is the item's index, set inline
+   by the component, which is what produces the stagger. The delay is capped
+   so the last card on a 24-card page does not wait a second. */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.card-in {
+  animation: fade-up var(--slow) var(--ease) backwards;
+  animation-delay: calc(min(var(--i, 0) * 35ms, 560ms));
+}
+
+/* Header text, same idea but with an explicit per-element delay. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 520ms var(--ease) backwards;
+  animation-delay: var(--d, 0ms);
+}
+
+/* Small things appearing: badges, chips, empty states. */
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pop {
+  animation: pop 320ms var(--ease);
+}
+
+.chip-in {
+  animation: pop 260ms var(--ease);
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pop-in {
+  animation: pop-in var(--mid) var(--ease);
+}
+
+/* The star filling in when a job is saved. */
+@keyframes star-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.35) rotate(-8deg);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.star.is-saved svg {
+  animation: star-pop 340ms var(--ease);
+}
+
+/* Skeleton shimmer: a light band sweeping left to right across each block. */
+@keyframes shimmer {
+  from {
+    background-position: -180% 0;
+  }
+  to {
+    background-position: 180% 0;
+  }
+}
+
+/* The drawer and its backdrop. */
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The indeterminate top progress bar. */
+@keyframes bar-sweep {
+  0% {
+    transform: translateX(-100%) scaleX(0.4);
+  }
+  50% {
+    transform: translateX(10%) scaleX(0.7);
+  }
+  100% {
+    transform: translateX(100%) scaleX(0.45);
+  }
+}
+
+/* The spinner in the search field. */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* The "live" dot in the header and the fresh-post dot on cards. */
+@keyframes ping {
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+    opacity: 1;
+  }
+  70% {
+    box-shadow: 0 0 0 7px transparent;
+    opacity: 0.85;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    opacity: 1;
+  }
+}
+
+/* The slow-drifting blobs behind the hero. */
+@keyframes drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(26px, -18px) scale(1.07);
+  }
+  66% {
+    transform: translate(-18px, 14px) scale(0.96);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+/* One switch for everyone who has asked for less movement. Transitions stay,
+   because an instant colour change on hover is jarring rather than calmer;
+   what goes is everything that moves or loops. */
+@media (prefers-reduced-motion: reduce) {
+  .card-in,
+  .rise,
+  .pop,
+  .pop-in,
+  .chip-in,
+  .star.is-saved svg,
+  .hero-blob,
+  .live-dot,
+  .fresh-dot,
+  .progress span,
+  .sk {
+    animation: none !important;
+  }
+
+  * {
+    scroll-behavior: auto !important;
+  }
+}

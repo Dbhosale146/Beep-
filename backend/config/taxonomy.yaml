@@ -1,0 +1,88 @@
+# The ONLY values the LLM may return. Anything else is rejected by the
+# validator in pipeline/tag.py and the post is marked "Untagged".
+# "Untagged" is written by our code on failure; it is never offered to the LLM.
+
+roles:
+  - Software Engineering
+  - Frontend Engineering
+  - Backend Engineering
+  - Mobile Engineering
+  - Data Science & Analytics
+  - Data Engineering
+  - Machine Learning & AI
+  - DevOps & Infrastructure
+  - QA & Testing
+  - Security Engineering
+  - Product Management
+  - Design (UI/UX)
+  - Sales & Business Development
+  - Marketing & Growth
+  - Operations & Support
+  - Finance & Accounting
+  - Human Resources
+  - Other
+
+# Canonical city -> aliases seen in raw job locations.
+# Aliases are matched case-insensitively as substrings during normalisation,
+# so the LLM mostly confirms rather than guesses.
+cities:
+  Bengaluru:    [Bangalore, Bangalore Urban, Bengaluru Urban, BLR, Bangaluru, Whitefield, Electronic City]
+  Gurugram:     [Gurgaon, Gurgaon Haryana, Udyog Vihar, Cyber City]
+  Mumbai:       [Bombay, Navi Mumbai, Thane, Powai, Andheri, Mumbai Suburban]
+  Pune:         [Poona, Hinjewadi, Kharadi, Pimpri-Chinchwad]
+  Hyderabad:    [Secunderabad, Hitech City, HITEC City, Gachibowli, Cyberabad]
+  Chennai:      [Madras, Sholinganallur, Guindy]
+  Delhi:        [New Delhi, NCR, Delhi NCR, National Capital Region]
+  Noida:        [Greater Noida, Noida Uttar Pradesh]
+  Kolkata:      [Calcutta, Salt Lake, Rajarhat]
+  Ahmedabad:    [Gandhinagar, GIFT City]
+  Jaipur:       [Pink City]
+  Kochi:        [Cochin, Ernakulam, Infopark]
+  Coimbatore:   []
+  Indore:       []
+  Chandigarh:   [Mohali, Panchkula, Zirakpur]
+  Thiruvananthapuram: [Trivandrum, Technopark]
+  Bhubaneswar:  []
+  Nagpur:       []
+  Vadodara:     [Baroda]
+  Mysuru:       [Mysore]
+  Visakhapatnam: [Vizag]
+  # Tier-2 cities. Added 2026-11-16 after the first real run tagged 68 posts
+  # "Multiple" only because their actual city was missing from this list.
+  Surat:        []
+  Rajkot:       []
+  Lucknow:      []
+  Kanpur:       []
+  Bhopal:       []
+  Raipur:       []
+  Patna:        []
+  Ranchi:       []
+  Guwahati:     []
+  Madurai:      []
+  Salem:        []
+  Tiruchirappalli: [Trichy]
+  Ludhiana:     []
+  Jalandhar:    []
+  Amritsar:     []
+  Dehradun:     []
+  Jodhpur:      []
+  Udaipur:      []
+  Nashik:       [Nasik]
+  Aurangabad:   [Chhatrapati Sambhajinagar]
+  Kolhapur:     []
+  Goa:          [Panaji, Panjim]
+  Mangaluru:    [Mangalore]
+  Hubballi:     [Hubli, Dharwad]
+  Vijayawada:   []
+  Warangal:     []
+  Kozhikode:    [Calicut]
+  Agra:         []
+  Varanasi:     [Banaras, Kashi]
+  Ghaziabad:    []
+  Faridabad:    []
+  Jamshedpur:   []
+  Puducherry:   [Pondicherry]
+  # Not real cities, but valid answers:
+  Pan India:    [All India, Across India, Nationwide]
+  Remote:       [Work from home, WFH, Anywhere in India, India Remote]
+  Multiple:     [Multiple locations, Various]
