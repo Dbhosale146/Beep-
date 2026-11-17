@@ -470,3 +470,122 @@ replays the stagger.
 - Not a git repository yet, so the workflow has never executed.
 - `data/eval_sample.csv` still needs 50 posts hand-labelled for the accuracy
   number.
+
+---
+
+## Phase 9 — made it actually deployable, and a repo (2026-11-17)
+
+### The problem
+
+Two requirements were unmet: "a live web tool" and "refreshes every day on its
+own". The workflow existed but had never run, because the project was not a git
+repository. And deploying was blocked on something worse: GitHub Pages cannot
+run Python, so the published page needed an API hosted somewhere else before it
+would show anything at all. That made the one graded link depend on a signup
+and a free-tier service that sleeps after 15 minutes.
+
+### The fix: one contract, two implementations
+
+`frontend/src/lib/api.js` now chooses its data source at build time.
+`VITE_API_BASE` set means talk to the Python API; unset means fetch the dataset
+bundled into the build and search it in the browser via a new
+`frontend/src/lib/search.js`. Both return the identical response shape, so
+`useJobs` and every component are unchanged and cannot tell the difference.
+
+Pages alone is now a complete working site. The API became an upgrade rather
+than a prerequisite.
+
+This is a genuine duplication — the same search logic in Python and in
+JavaScript, two places to change. I decided it was worth it because the
+contract is small and frozen, and because I could test the two against each
+other. If they ever disagree, `api/main.py` is the source of truth.
+
+### What broke, and the fix
+
+**1. The cross-check immediately found a disagreement — and the JS was right.**
+I wrote a throwaway script that runs 20 query sets through both
+implementations and diffs ids, order, descriptions, truncation flags and all
+three facet maps. Eight sets disagreed, all on `facets.sources`. For
+`city=Bengaluru`, Python returned `{adzuna: 557, lever: 5, greenhouse: 3}` —
+all 565 — while the JS returned counts summing to 92, the actual result count.
+
+The JS was correct. Python was ignoring the city filter when counting sources,
+because `base` had the source filter baked in and the sources facet was
+`counts(base)`. I had already fixed this and added a passing test. The tests
+passed because pytest imports the module fresh; **the running server was still
+executing the old code.**
+
+**2. Chasing that stale server took four attempts.** `uvicorn --reload` had not
+picked up the edit. Killing the reloader (PID 31036) left its worker alive
+holding the port, so the replacement server exited with code 3 and the old one
+kept answering. Then `netstat` listed two PIDs on port 8000 that
+`Get-Process` reported as already gone — stale socket entries. The actual
+listener was PID 17412, the worker from the *first* `--reload` launch hours
+earlier. Killing that one fixed it, and all 20 query sets then agreed.
+
+Lesson I will repeat on the call: a passing test suite says nothing about what
+a long-running dev server is serving. I only caught it because the cross-check
+compared two live implementations instead of trusting either.
+
+**3. Verified the static path in the exact Pages configuration.** Loaded the
+built `dist/` in jsdom with a fetch that serves *only* files inside `dist/`, so
+any API call would 404. 21 of 22 checks passed first run: no `/api/` request
+made, 565 rendered, 24 pages of real data, client-side search, real facet
+counts, drawer reading full descriptions, and `jobs.json` fetched exactly once
+rather than per query.
+
+The one failure was my assertion, not the code: searching "intern pune"
+returned a card whose city pill said `Multiple`, and I had asserted every
+result would say Pune. The posting is at **"Warje, Pune"** — a Pune suburb —
+and search covers `raw_location`, so matching it is correct.
+
+**But it exposed a real tagging error.** `prompts/tag_v2.txt` explicitly states
+that a suburb counts as its city, and the model still tagged "Warje, Pune" as
+`Multiple`. That is exactly the class of mistake the 50-post hand-check is for.
+Left as-is for now: fixing the prompt means bumping `PROMPT_VERSION`, which
+invalidates the whole tag cache and costs a full re-tag.
+
+**4. Checked what a public repo would expose before committing.** `.env` is
+correctly ignored. Scanning the staged diff turned up 32-character hex strings,
+which are `tag_cache.json` content hashes, not secrets. But the Adzuna
+`app_id` *is* embedded in all 557 Adzuna URLs as `utm_source` — Adzuna puts it
+there itself in `redirect_url`. The `app_key` is not exposed, and the API needs
+both, so the id alone is unusable. Left in place deliberately: it is Adzuna's
+attribution mechanism, and stripping it would work against the "respect each
+site's terms" requirement.
+
+### Real output
+
+```
+$ node crosscheck.mjs            # python API vs js search, same dataset
+PASS  (no filters)                                    (total 565)
+PASS  q=intern                                        (total 266)
+PASS  q=intern+pune                                   (total 11)
+PASS  role=Software+Engineering&city=Bengaluru        (total 9)
+PASS  source=lever                                    (total 5)
+PASS  posted_within_days=7                            (total 227)
+PASS  sort=company / sort=title / sort=oldest          ...
+PASS  page=10&page_size=7                             (total 565)
+PYTHON AND JS AGREE ON EVERY QUERY      (20 query sets)
+
+$ node static-check.mjs          # dist/ with no API reachable
+PASS  no /api/ request was made
+PASS  real total rendered -> "565"
+PASS  24 pages of real data
+PASS  jobs.json fetched exactly once -> 1 times
+STATIC SITE WORKS WITH NO BACKEND
+
+$ cd backend && python -m pytest -q
+74 passed in 1.99s
+
+$ git log --oneline -1 --stat
+74 files changed, 21686 insertions(+)
+```
+
+### Still open
+
+- The repo is committed locally on `main` but **not pushed** — no `gh` CLI here
+  and pushing needs the account. Once pushed and Pages is switched to "GitHub
+  Actions", the daily refresh is live.
+- Nobody has opened the site in a real browser.
+- `data/eval_sample.csv` still needs 50 posts hand-labelled.

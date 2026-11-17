@@ -315,20 +315,46 @@ time. It bills **output + thinking** tokens, because Gemini reports
 
 ## Deployment
 
-The two halves deploy separately, because GitHub Pages cannot run Python.
+The site and the API deploy independently, and **the site does not need the
+API to work**.
 
-- **API** → any Python host. `render.yaml` is a ready blueprint: it runs from
-  `backend/`, starts `uvicorn api.main:app --host 0.0.0.0 --port $PORT`, and
-  health-checks `/api/health`. Set `CORS_ORIGINS` to the Pages origin.
-- **Frontend** → GitHub Pages, built and deployed by the workflow. Set a
-  repository **variable** `API_BASE_URL` to the deployed API including `/api`
-  (Settings → Secrets and variables → Actions → Variables). It is baked into
-  the bundle at build time, because a static site has no server to read env
-  vars at runtime; the workflow warns if it is missing.
+`frontend/src/lib/api.js` picks its data source at build time:
 
-On the free tier the API sleeps when idle, so the first visitor after a quiet
-period waits for a cold start. That is the cost of a live backend at this size
-and it is worth knowing before demoing it.
+| `VITE_API_BASE` | behaviour |
+|---|---|
+| not set | the page fetches the dataset bundled into the build and searches it in the browser (`lib/search.js`) |
+| set | the page calls that HTTP API instead |
+
+Both paths return the identical response shape, so no hook or component knows
+which one answered.
+
+**Why bother with two.** GitHub Pages cannot run Python. Without the local
+path, the published link — the one thing actually being graded — would be dead
+whenever the API is undeployed or asleep on a free tier. With it, Pages alone
+is a complete, instant, daily-refreshing site, and the API becomes an upgrade
+switched on with one repository variable.
+
+The cost is real and worth stating plainly: the search exists twice, in Python
+and in JavaScript. That is only safe because the contract is small and frozen,
+and because the two are diffed against each other over 20 query sets covering
+filters, sorting, paging and all three facet maps. If they ever disagree,
+`backend/api/main.py` is the source of truth.
+
+**Publishing the site** (no server needed):
+
+1. Push to GitHub.
+2. Settings → Pages → Source: **GitHub Actions**.
+3. Settings → Secrets and variables → Actions → add secrets `ADZUNA_APP_ID`,
+   `ADZUNA_APP_KEY`, `GEMINI_API_KEY`.
+4. Actions → *daily refresh* → **Run workflow**.
+
+**Adding the live API** (optional): deploy `backend/` anywhere that runs
+Python — `render.yaml` is a ready blueprint that starts
+`uvicorn api.main:app --host 0.0.0.0 --port $PORT` from `backend/` and
+health-checks `/api/health`. Set `CORS_ORIGINS` to the Pages origin, then add a
+repository **variable** `API_BASE_URL` pointing at it including `/api`. The next
+build switches over. On a free tier the service sleeps when idle, which is why
+the static path is the default rather than the fallback.
 
 ## Daily refresh
 
