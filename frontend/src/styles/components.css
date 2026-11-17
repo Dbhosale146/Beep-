@@ -1091,25 +1091,43 @@
   border-radius: var(--radius-sm);
 }
 
-.login-unconfigured {
+.login-points {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.login-points li {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  font-size: 0.86rem;
+  color: var(--text-soft);
+}
+
+.login-points span {
+  color: var(--accent);
+  font-size: 0.6rem;
+  line-height: 1.9;
+}
+
+.login-unavailable {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
   padding: 16px;
   text-align: center;
+  color: var(--text-muted);
+  font-size: 0.875rem;
   background: var(--surface-2);
-  border: 1px dashed var(--border-strong);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-}
-
-.login-unconfigured code {
-  padding: 1px 5px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.78rem;
-  background: var(--surface);
-  border-radius: 4px;
 }
 
 .login-fine {

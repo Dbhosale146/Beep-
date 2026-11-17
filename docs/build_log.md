@@ -690,3 +690,71 @@ implying the static build is secured.
   button can appear.
 - Repo is committed locally but still not pushed.
 - 50 posts still need hand-labelling.
+
+---
+
+## Phase 11 — wiring the real client id, and two things it exposed (2026-11-17)
+
+Configured the OAuth client id (origins already set to http://localhost:5173
+and https://dbhosale146.github.io) and turned REQUIRE_AUTH on.
+
+The credentials file Google downloads also contains a client_secret. It is not
+used anywhere here and is not stored in the repo: Identity Services returns an
+ID token to the browser, and the API verifies it against Google's public keys.
+A client secret only matters for server-side authorization-code flows.
+
+### What broke, and the fix
+
+**1. The API never read .env, so auth was silently off.** After setting
+GOOGLE_CLIENT_ID and REQUIRE_AUTH, /api/auth/config still answered
+`{"configured": false, "required": false}` and /api/jobs still served data to
+anonymous callers.
+
+Cause: pipeline/config.py only loads .env inside require_env(), which the
+pipeline calls for its secrets. api/auth.py reads os.environ directly, so
+nothing had ever loaded the file into the process. The failure mode is the
+dangerous direction — the API runs WIDE OPEN while looking correctly
+configured. Fixed with a load_env() at import in api/main.py.
+
+**2. That fix made 25 tests fail, which was the right thing to happen.** With
+.env now loaded at import, REQUIRE_AUTH=true leaked into the test process and
+every test_api.py request 401'd.
+
+The real problem was not the failure but the dependency: a suite whose result
+depends on an untracked local file passes in CI and fails on the developer's
+machine, which teaches you to trust the green pipeline over the red terminal.
+Added tests/conftest.py clearing the auth variables before every test, so tests
+control their own environment and the ones that care set them explicitly.
+104 pass again, with a real .env present.
+
+**3. The login page showed developer instructions to visitors.** The
+unconfigured state read "Set VITE_GOOGLE_CLIENT_ID in frontend/.env to a Google
+OAuth client id, then rebuild." That is meaningless to someone looking for a
+job and leaks implementation detail onto a public page.
+
+Now the page says "Sign-in is temporarily unavailable" and the setup
+instructions go to console.warn, where whoever runs the app will see them.
+There is a test asserting the rendered page contains none of
+"VITE_GOOGLE_CLIENT_ID", ".env", "OAuth", "client id", "rebuild" or
+"console.cloud". Also tightened the copy and added three value-proposition
+lines, since the wall was mostly empty space.
+
+### Real output
+
+    $ curl /api/auth/config
+    {"configured":true,"required":true}
+
+    $ curl /api/jobs            -> 401 {"detail":"sign in required"}
+    $ curl /api/meta            -> 401 {"detail":"sign in required"}
+    $ curl /api/health          -> 200   (open, for host probes)
+
+    $ curl -H "Authorization: Bearer <forged>" /api/me
+    401 {"detail":"invalid Google token: Could not verify token signature."}
+
+That last line is google-auth doing real cryptography against Google's
+published keys. It is the difference between this and a login that only hides
+the UI.
+
+    jsdom, configured build:    18/18 PASSED
+    jsdom, unconfigured build:  18/18 PASSED
+    backend:                    104 passed

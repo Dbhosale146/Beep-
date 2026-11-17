@@ -26,13 +26,6 @@ CLAIMS = {
 }
 
 
-@pytest.fixture(autouse=True)
-def clean_env(monkeypatch):
-    """Every test starts with auth unconfigured, and sets what it needs."""
-    for name in ("GOOGLE_CLIENT_ID", "REQUIRE_AUTH", "ALLOWED_EMAILS"):
-        monkeypatch.delenv(name, raising=False)
-
-
 @pytest.fixture
 def client():
     return TestClient(main.app, raise_server_exceptions=False)

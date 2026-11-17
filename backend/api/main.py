@@ -24,7 +24,15 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.auth import auth_required, client_id, current_user
-from pipeline.config import data_path
+from pipeline.config import data_path, load_env
+
+# Read backend/.env into the environment before anything reads a setting from
+# it. The pipeline gets this for free because require_env() calls load_env(),
+# but api/auth.py reads os.environ directly, so without this line GOOGLE_CLIENT_ID
+# and REQUIRE_AUTH are silently absent and the API runs wide open.
+# In production there is no .env and these are already real env vars, so this
+# does nothing there.
+load_env()
 
 app = FastAPI(
     title="Beep fresher jobs API",
