@@ -33,7 +33,6 @@ Two halves, two folders, nothing shared between them except the HTTP contract.
 backend/      Python: the daily pipeline and the API that serves its output
 frontend/     React + Vite: the job board
 docs/         build log
-render.yaml   deploy blueprint for the API
 ```
 
 ```
@@ -391,9 +390,8 @@ filters, sorting, paging and all three facet maps. If they ever disagree,
 4. Actions → *daily refresh* → **Run workflow**.
 
 **Adding the live API** (optional): deploy `backend/` anywhere that runs
-Python — `render.yaml` is a ready blueprint that starts
-`uvicorn api.main:app --host 0.0.0.0 --port $PORT` from `backend/` and
-health-checks `/api/health`. Set `CORS_ORIGINS` to the Pages origin, then add a
+Python, starting `uvicorn api.main:app --host 0.0.0.0 --port $PORT` from
+`backend/` with health check `/api/health`. Set `CORS_ORIGINS` to the Pages origin, then add a
 repository **variable** `API_BASE_URL` pointing at it including `/api`. The next
 build switches over. On a free tier the service sleeps when idle, which is why
 the static path is the default rather than the fallback.

@@ -19,3 +19,7 @@ frontend/public/data/
 # the API serves them and the site needs them to exist on a fresh checkout.
 backend/data/raw_jobs.json
 backend/data/normalised_jobs.json
+
+# Deployment config kept out of the repo by request. The file still
+# exists locally; Render is configured by hand in its dashboard instead.
+render.yaml
