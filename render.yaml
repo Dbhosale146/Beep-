@@ -1,22 +1,59 @@
-# Deploy blueprint for the API (render.com). The frontend is a static build
-# and goes to GitHub Pages from .github/workflows/daily.yml; this file is only
-# for the Python service.
+# Deploy blueprint for the API (render.com). The frontend is a static build and
+# goes to GitHub Pages from .github/workflows/daily.yml; this file is only for
+# the Python service.
 #
-# rootDir matters: the API imports pipeline.config, so it has to run from
-# backend/ where that package and the data files live.
+# To use it: Render Dashboard -> New -> Blueprint -> pick this repo.
+# Everything below is applied automatically; nothing needs typing in by hand.
 services:
   - type: web
     name: beep-jobs-api
     runtime: python
-    rootDir: backend
+
+    # plan must be stated. Leaving it out does not mean "free" -- Render
+    # defaults to a paid starter instance.
     plan: free
+    region: singapore # closest region to India
+
+    # rootDir matters: the API imports pipeline.config, so it has to run from
+    # backend/ where that package and the committed data files live.
+    rootDir: backend
+
     buildCommand: pip install -r requirements.txt
-    # $PORT is assigned by the host. Binding 0.0.0.0 rather than 127.0.0.1 is
-    # what makes the service reachable from outside its container.
+
+    # $PORT is assigned by the host and is already in the environment, so it
+    # expands here. Binding 0.0.0.0 rather than 127.0.0.1 is what makes the
+    # service reachable from outside its container.
     startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+
+    # Deliberately an endpoint that needs no token: a health probe has no way
+    # to sign in, and a 401 here would make the service look dead.
     healthCheckPath: /api/health
+
     envVars:
-      # The GitHub Pages origin, so the browser is allowed to call this API.
-      # Set in the dashboard, not here, because it is deployment-specific.
+      # Pinned to the version this was built and tested on. Render otherwise
+      # picks its own default, which moves over time.
+      - key: PYTHON_VERSION
+        value: 3.12.0
+
+      # Not a secret: this id identifies the app on Google's consent screen
+      # and is compiled into the public frontend bundle either way. Hardcoded
+      # rather than prompted so both halves cannot drift apart. The client
+      # SECRET is not used anywhere in this project and is not here.
+      - key: GOOGLE_CLIENT_ID
+        value: 164076346307-3cf5gasaumvceofhpsiq02b7eaqccjj7.apps.googleusercontent.com
+
+      # Refuse anonymous callers on the data endpoints. Off by default in the
+      # code so local development and the tests need no tokens; on here.
+      - key: REQUIRE_AUTH
+        value: "true"
+
+      # The browser origins allowed to call this API. The GitHub Pages site is
+      # on another domain, so without this the browser blocks every request.
       - key: CORS_ORIGINS
+        value: https://dbhosale146.github.io
+
+      # Optional allowlist. Unset means any Google account may sign in, which
+      # is usually right for a public job board. Set it in the dashboard to
+      # restrict access to named addresses.
+      - key: ALLOWED_EMAILS
         sync: false
