@@ -1,0 +1,56 @@
+name: keep the API awake
+
+# Render spins a free web service down after 15 minutes without traffic, and
+# waking it takes about a minute. This pings it so a visitor does not land on
+# a loading page.
+#
+# Why only part of the day: Render grants 750 free instance hours per month
+# per WORKSPACE, and a spun-down service consumes none of them. Awake 24/7 is
+# 720 hours in a 30-day month and 744 in a 31-day one -- inside the budget by
+# a margin so thin that one extra service, or a few redeploys, would blow it.
+# Running out suspends every free web service in the workspace until the next
+# calendar month.
+#
+# 03:30-19:30 UTC is 09:00-01:00 IST, which covers the hours anyone would
+# realistically open the site. That is roughly 510 hours a month, leaving real
+# headroom. Outside the window the service sleeps and costs nothing.
+on:
+  schedule:
+    - cron: "*/10 3-19 * * *"
+  workflow_dispatch:
+
+# Never queue these up behind each other: a late run is worthless, and a
+# backlog would keep pinging long after the window closed.
+concurrency:
+  group: keepalive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the health endpoint
+        env:
+          # Repository variable (Settings > Secrets and variables > Actions >
+          # Variables). Example: https://beep-6fn4.onrender.com
+          # Left unset, this job does nothing rather than failing loudly.
+          URL: ${{ vars.KEEPALIVE_URL }}
+        run: |
+          if [ -z "$URL" ]; then
+            echo "KEEPALIVE_URL is not set - nothing to ping."
+            exit 0
+          fi
+
+          # --max-time is generous because a cold start takes about a minute,
+          # and that first slow request is exactly the one doing the waking.
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 120 "${URL%/}/api/health" || echo "000")
+          echo "GET ${URL%/}/api/health -> $code"
+
+          # A sleeping service answering slowly is a success, not a failure.
+          # Only a genuinely broken service should turn the run red, and even
+          # then this must not spam failures: it is a nicety, not a monitor.
+          if [ "$code" = "200" ]; then
+            echo "awake"
+          else
+            echo "::warning::Health check returned $code"
+          fi
