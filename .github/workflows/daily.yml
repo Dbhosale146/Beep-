@@ -92,11 +92,19 @@ jobs:
         working-directory: frontend
         env:
           VITE_API_BASE: ${{ vars.API_BASE_URL }}
+          # Also baked in at build time. Leave it unset and the published page
+          # has no Google sign-in configured, so the login wall cannot be
+          # passed -- set it as an Actions *variable* (it is a public client
+          # id, not a secret).
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
         run: |
           if [ -z "$VITE_API_BASE" ]; then
             echo "API_BASE_URL not set - building in static mode (searches the bundled dataset)."
           else
             echo "Building against API: $VITE_API_BASE"
+          fi
+          if [ -z "$VITE_GOOGLE_CLIENT_ID" ]; then
+            echo "::warning::VITE_GOOGLE_CLIENT_ID not set - the deployed page will have no Google sign-in."
           fi
           npm ci
           npm run build
