@@ -89,6 +89,11 @@
     "is_fresher": true,
     "role": "Operations & Support"
   },
+  "037a2282c5df9621356139daa7ae5eeb": {
+    "city": "Coimbatore",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "03858a8c2161ef7b8e0c8369dd046eb4": {
     "city": "Bengaluru",
     "is_fresher": true,
@@ -103,6 +108,16 @@
     "city": "Bengaluru",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "03e57d61ed6fc98ad81055ea50ad5af1": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
+  "0407833edccbbda6a8e528d234a01f8e": {
+    "city": "Hyderabad",
+    "is_fresher": true,
+    "role": "Software Engineering"
   },
   "04323be85228d32c2bd008fdf4c8f56a": {
     "city": "Pan India",
@@ -139,6 +154,11 @@
     "is_fresher": true,
     "role": "Software Engineering"
   },
+  "04fe84654fa7ff2167e2d7d8cc77e4da": {
+    "city": "Chennai",
+    "is_fresher": true,
+    "role": "Finance & Accounting"
+  },
   "0537fc3d9c5c3a60bac38af71e0233f0": {
     "city": "Kochi",
     "is_fresher": true,
@@ -149,8 +169,23 @@
     "is_fresher": true,
     "role": "Machine Learning & AI"
   },
+  "056664ce898b1571f5098e33f7f05f63": {
+    "city": "Mumbai",
+    "is_fresher": true,
+    "role": "Marketing & Growth"
+  },
+  "056a43bb03419f960301342add4db81f": {
+    "city": "Multiple",
+    "is_fresher": true,
+    "role": "Software Engineering"
+  },
   "05a33aeed6a90e603e8fcd359fab2225": {
     "city": "Coimbatore",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
+  "05c59b9caf5af5085dd97f24c68fd552": {
+    "city": "Pan India",
     "is_fresher": true,
     "role": "Operations & Support"
   },
@@ -194,10 +229,20 @@
     "is_fresher": true,
     "role": "Machine Learning & AI"
   },
+  "0668d1dc3e5799ad5da883b75f9f0853": {
+    "city": "Pune",
+    "is_fresher": true,
+    "role": "Finance & Accounting"
+  },
   "06699d6e33f297cfcfac1381d3ec032c": {
     "city": "Bengaluru",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "067ba7029e5442ddc56b976d17c82da2": {
+    "city": "Chennai",
+    "is_fresher": true,
+    "role": "Other"
   },
   "068eac7033532a7e77792e8172d0b028": {
     "city": "Pan India",
@@ -208,6 +253,11 @@
     "city": "Bengaluru",
     "is_fresher": true,
     "role": "Marketing & Growth"
+  },
+  "07869f9ce8bc47687b66a0de2eeeebf0": {
+    "city": "Chennai",
+    "is_fresher": true,
+    "role": "Finance & Accounting"
   },
   "07cf77b597ba7c604aee505422930514": {
     "city": "Jaipur",
@@ -373,6 +423,11 @@
     "city": "Pan India",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "0e497f76450f14ffdf595492d1838014": {
+    "city": "Remote",
+    "is_fresher": true,
+    "role": "Security Engineering"
   },
   "0ea0e7f4109ed655a98203f2aaa25ed7": {
     "city": "Noida",
@@ -674,6 +729,11 @@
     "is_fresher": true,
     "role": "Marketing & Growth"
   },
+  "1b0dc5faaec8795d70b2d1b65d01b69b": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Software Engineering"
+  },
   "1b2ce7941c3ddfd8ba2a73bba848077b": {
     "city": "Pan India",
     "is_fresher": true,
@@ -794,6 +854,11 @@
     "is_fresher": true,
     "role": "Operations & Support"
   },
+  "1f83730733b7683863f708c1682b0832": {
+    "city": "Hyderabad",
+    "is_fresher": true,
+    "role": "Other"
+  },
   "1fec4644363a9039055a444316a14cdf": {
     "city": "Bengaluru",
     "is_fresher": true,
@@ -823,6 +888,11 @@
     "city": "Pan India",
     "is_fresher": true,
     "role": "Human Resources"
+  },
+  "21306b65c3bed91683e7bb1308e15062": {
+    "city": "Delhi",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
   },
   "21502324717a04a3189cc51b429d56e5": {
     "city": "Ahmedabad",
@@ -859,6 +929,11 @@
     "is_fresher": true,
     "role": "Sales & Business Development"
   },
+  "2344cfb6ae1e8d388da437e74f6d058b": {
+    "city": "Chandigarh",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
+  },
   "235977f2b339d0250b7d4c23612a8931": {
     "city": "Gurugram",
     "is_fresher": true,
@@ -873,6 +948,11 @@
     "city": "Chennai",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "2472d4a86b4ad7681949c8f24321529f": {
+    "city": "Hyderabad",
+    "is_fresher": true,
+    "role": "Frontend Engineering"
   },
   "2475efb6a7b2ae07c5ec87fdc4ad8c7f": {
     "city": "Multiple",
@@ -964,6 +1044,11 @@
     "is_fresher": true,
     "role": "Human Resources"
   },
+  "26ed1383aab30cbd7cefccc1ed6460ed": {
+    "city": "Multiple",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "2703b07e6c7d0a902c3422e5859eb47a": {
     "city": "Pan India",
     "is_fresher": true,
@@ -1029,6 +1114,11 @@
     "is_fresher": true,
     "role": "Marketing & Growth"
   },
+  "29be252c0e9fb614828def2722ed02b3": {
+    "city": "Multiple",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "29f3f9c4a74f043524d193e70f144a46": {
     "city": "Pan India",
     "is_fresher": true,
@@ -1089,6 +1179,11 @@
     "is_fresher": true,
     "role": "QA & Testing"
   },
+  "2cd7e94d91fb6558958e82bbe8a423f7": {
+    "city": "Multiple",
+    "is_fresher": true,
+    "role": "Other"
+  },
   "2cf42cec8623d07d52527b4b53f23b98": {
     "city": "Bengaluru",
     "is_fresher": true,
@@ -1134,6 +1229,11 @@
     "is_fresher": true,
     "role": "Human Resources"
   },
+  "2eacbabf0ae1620c6887f979e8703f24": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Other"
+  },
   "2ec632d53b1c61cdcf7bd664bd48519a": {
     "city": "Mumbai",
     "is_fresher": true,
@@ -1163,6 +1263,11 @@
     "city": "Remote",
     "is_fresher": true,
     "role": "Sales & Business Development"
+  },
+  "303839578d0d274c3571a6684e14daf8": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Software Engineering"
   },
   "3039844a00677818086d3ab27b1eba37": {
     "city": "Chennai",
@@ -1213,6 +1318,11 @@
     "city": "Noida",
     "is_fresher": true,
     "role": "Finance & Accounting"
+  },
+  "334ec41a4211423db811dd3ddd27321b": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Software Engineering"
   },
   "33669c473df51c330c6db00254e5a5b4": {
     "city": "Pan India",
@@ -1314,6 +1424,11 @@
     "is_fresher": true,
     "role": "QA & Testing"
   },
+  "37937a639a1756a279cd85acceb5b40f": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
+  },
   "37a0f525d43d68bc9857b425f3f16742": {
     "city": "Multiple",
     "is_fresher": true,
@@ -1399,6 +1514,11 @@
     "is_fresher": true,
     "role": "Human Resources"
   },
+  "3a2f9c315639adbbf69ace6a220d1867": {
+    "city": "Noida",
+    "is_fresher": true,
+    "role": "Marketing & Growth"
+  },
   "3a3e4a0b895a10f239be37ecd7d9dfb6": {
     "city": "Multiple",
     "is_fresher": true,
@@ -1439,6 +1559,11 @@
     "is_fresher": true,
     "role": "Human Resources"
   },
+  "3be6cb7dbe53788981c9fadf7f50f930": {
+    "city": "Multiple",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "3c33601da71171fd3cd105e2428a2634": {
     "city": "Bengaluru",
     "is_fresher": true,
@@ -1448,6 +1573,16 @@
     "city": "Jaipur",
     "is_fresher": true,
     "role": "Marketing & Growth"
+  },
+  "3c686b61d8f8cd14cf02770b747bdc7d": {
+    "city": "Mumbai",
+    "is_fresher": true,
+    "role": "Security Engineering"
+  },
+  "3c6e6df1cf67010750b6f7d675a77d03": {
+    "city": "Hyderabad",
+    "is_fresher": true,
+    "role": "Human Resources"
   },
   "3c71611e4176f6775b303e41422bd876": {
     "city": "Multiple",
@@ -1554,6 +1689,11 @@
     "is_fresher": true,
     "role": "Human Resources"
   },
+  "3eb4b1ebac7b0b9251d1fbcdd1ec51bd": {
+    "city": "Coimbatore",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "3f10051b77089d8a21a45624efb1d827": {
     "city": "Mumbai",
     "is_fresher": true,
@@ -1614,8 +1754,18 @@
     "is_fresher": true,
     "role": "Finance & Accounting"
   },
+  "418dd5003931e350a851d79b46ddced3": {
+    "city": "Multiple",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "425e7bb937e7055952e6b3b1797608e6": {
     "city": "Vadodara",
+    "is_fresher": true,
+    "role": "Human Resources"
+  },
+  "426b7dd350af6ec7ebaaf0f26921662e": {
+    "city": "Mumbai",
     "is_fresher": true,
     "role": "Human Resources"
   },
@@ -1694,6 +1844,11 @@
     "is_fresher": true,
     "role": "Sales & Business Development"
   },
+  "44c6fef3db0820e5068795f7e8d5e83e": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Software Engineering"
+  },
   "44d3b6f60c659e581ccdb9d10364ace9": {
     "city": "Hyderabad",
     "is_fresher": true,
@@ -1701,6 +1856,11 @@
   },
   "459b327df71b14c8d27d612ed4b1dae4": {
     "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Human Resources"
+  },
+  "45b3556c769397a75a7a3a28be49d89c": {
+    "city": "Pan India",
     "is_fresher": true,
     "role": "Human Resources"
   },
@@ -1748,6 +1908,21 @@
     "city": "Bhopal",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "4780a89f174261d5dec3335bbcd89021": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Other"
+  },
+  "479c0e4b60d624c61d2b412b04029e50": {
+    "city": "Ahmedabad",
+    "is_fresher": true,
+    "role": "Human Resources"
+  },
+  "47b7ed34d450b1ef33d0ad3df9830a92": {
+    "city": "Multiple",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
   },
   "47d2895cb9748c77ee2ea1591f8dfc22": {
     "city": "Ahmedabad",
@@ -1839,6 +2014,11 @@
     "is_fresher": true,
     "role": "Software Engineering"
   },
+  "4c493a3dee81b4612f9d2fd7c68b3217": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "4c4cb0fc7cc3ca3dd47f75dd445b6a00": {
     "city": "Lucknow",
     "is_fresher": true,
@@ -1848,6 +2028,11 @@
     "city": "Bengaluru",
     "is_fresher": true,
     "role": "Human Resources"
+  },
+  "4c76b39eff2fae859b3a37f8a837a03b": {
+    "city": "Jaipur",
+    "is_fresher": true,
+    "role": "Software Engineering"
   },
   "4c771f29881c0a5396b7252d2faa74d1": {
     "city": "Hyderabad",
@@ -1873,6 +2058,11 @@
     "city": "Bhubaneswar",
     "is_fresher": true,
     "role": "Sales & Business Development"
+  },
+  "4d99d810b9a57ce268be4c6b5304c1fe": {
+    "city": "Hyderabad",
+    "is_fresher": true,
+    "role": "Other"
   },
   "4da59a7fb7a50ee798e5766d3e271d73": {
     "city": "Hyderabad",
@@ -1983,6 +2173,11 @@
     "city": "Multiple",
     "is_fresher": true,
     "role": "Marketing & Growth"
+  },
+  "52f8770fda0ab37a9e8063efbdc94db6": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Machine Learning & AI"
   },
   "533614310c1aff8218b32c1b8ce885d2": {
     "city": "Mumbai",
@@ -2104,6 +2299,11 @@
     "is_fresher": false,
     "role": "DevOps & Infrastructure"
   },
+  "583fc5dda368817812650bc8e88b8147": {
+    "city": "Mumbai",
+    "is_fresher": true,
+    "role": "Finance & Accounting"
+  },
   "5872d1ae3ad9965fa7cf1e93084cfca2": {
     "city": "Pan India",
     "is_fresher": true,
@@ -2113,6 +2313,11 @@
     "city": "Multiple",
     "is_fresher": true,
     "role": "Software Engineering"
+  },
+  "58a89d69a8589a4ec4f8efd6244c70b7": {
+    "city": "Remote",
+    "is_fresher": true,
+    "role": "Machine Learning & AI"
   },
   "58b4f5bdfb812d85c63c495afd4ede47": {
     "city": "Indore",
@@ -2149,6 +2354,11 @@
     "is_fresher": true,
     "role": "Software Engineering"
   },
+  "5995256b0a41c902a1c50b1149afd224": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Other"
+  },
   "5a20281798412e2dcbe6c60ec0aa7ba7": {
     "city": "Multiple",
     "is_fresher": true,
@@ -2165,6 +2375,11 @@
     "role": "Operations & Support"
   },
   "5a713e73379744a743bcc60bc012a6aa": {
+    "city": "Remote",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
+  },
+  "5aa46eac217ddbf358419735788d07ae": {
     "city": "Remote",
     "is_fresher": true,
     "role": "Sales & Business Development"
@@ -2214,6 +2429,11 @@
     "is_fresher": true,
     "role": "Finance & Accounting"
   },
+  "5c3e0eb1c094c7bf1cce5b76394374e5": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Software Engineering"
+  },
   "5c45ccfcaee793ef99fa2643300d169f": {
     "city": "Gurugram",
     "is_fresher": true,
@@ -2259,6 +2479,11 @@
     "is_fresher": true,
     "role": "Operations & Support"
   },
+  "5f091c7fa3120b6471c3e00d0cb2eaa2": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "5f27ebcfcb5b1213a823a25ab44e033a": {
     "city": "Pan India",
     "is_fresher": true,
@@ -2273,6 +2498,16 @@
     "city": "Delhi",
     "is_fresher": true,
     "role": "Design (UI/UX)"
+  },
+  "5f51e8118fad3b13bdfeb55d8fe2bcd4": {
+    "city": "Jaipur",
+    "is_fresher": true,
+    "role": "Marketing & Growth"
+  },
+  "5fa921478e7f22146b7570f0477aa960": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Software Engineering"
   },
   "6019d6402148c27d5718464fa2cdadeb": {
     "city": "Hyderabad",
@@ -2389,10 +2624,20 @@
     "is_fresher": true,
     "role": "Security Engineering"
   },
+  "637dd25a9c7c440d58ae05978cff5d49": {
+    "city": "Nagpur",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
+  },
   "63efeba6a254a594246b40430ea60de5": {
     "city": "Pan India",
     "is_fresher": true,
     "role": "Software Engineering"
+  },
+  "64083a05f6dd5aae965b82a2970123d6": {
+    "city": "Pune",
+    "is_fresher": true,
+    "role": "Human Resources"
   },
   "641f03f98fa7c49045799db8c72f6abc": {
     "city": "Multiple",
@@ -2519,6 +2764,11 @@
     "is_fresher": true,
     "role": "Backend Engineering"
   },
+  "684cbcace84bba9bc7b4b4eaa50c942d": {
+    "city": "Gurugram",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
+  },
   "686940987a06236f364cef6dcaead4f8": {
     "city": "Indore",
     "is_fresher": true,
@@ -2548,6 +2798,11 @@
     "city": "Gurugram",
     "is_fresher": true,
     "role": "Finance & Accounting"
+  },
+  "698f8eef1b755b754515b679fe3e802d": {
+    "city": "Chennai",
+    "is_fresher": true,
+    "role": "Software Engineering"
   },
   "69c823a325a6325e3ecd944e94ba9e7f": {
     "city": "Bengaluru",
@@ -2583,6 +2838,11 @@
     "city": "Bengaluru",
     "is_fresher": true,
     "role": "Machine Learning & AI"
+  },
+  "6a45f8c7f1004b89f7350a4de336eef2": {
+    "city": "Mumbai",
+    "is_fresher": true,
+    "role": "Operations & Support"
   },
   "6afa8719cc567e5c5a98b54aa0b54e82": {
     "city": "Kochi",
@@ -2699,6 +2959,11 @@
     "is_fresher": true,
     "role": "Software Engineering"
   },
+  "6f7c849028c2541114c9e6048288ee31": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Software Engineering"
+  },
   "7010e04fe92744f851a9158d8dbde9fc": {
     "city": "Indore",
     "is_fresher": true,
@@ -2718,6 +2983,11 @@
     "city": "Mumbai",
     "is_fresher": true,
     "role": "Sales & Business Development"
+  },
+  "7113896eef30caeaf9477b8eeeb5eeb2": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Software Engineering"
   },
   "712d5cee6c3e9ebf415184afffdb3041": {
     "city": "Pan India",
@@ -2739,10 +3009,20 @@
     "is_fresher": true,
     "role": "Marketing & Growth"
   },
+  "7215653c681dfc6089374a9cc8a0e38e": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Finance & Accounting"
+  },
   "722889d27cc312fc0d89a0ea70751c72": {
     "city": "Chennai",
     "is_fresher": true,
     "role": "Software Engineering"
+  },
+  "7249ef43ef1c43aa40b7085c2318ef9e": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Data Science & Analytics"
   },
   "726cf6c892a3243020ea1d05996a11f9": {
     "city": "Remote",
@@ -2794,10 +3074,20 @@
     "is_fresher": true,
     "role": "Machine Learning & AI"
   },
+  "74e4bad99f603cc29b9e98e8ef65d6da": {
+    "city": "Mumbai",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "74eebabc23acf6be796a09c0934b7e2c": {
     "city": "Indore",
     "is_fresher": true,
     "role": "Human Resources"
+  },
+  "75585d2c5d26705f8981afc2bcaca635": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Software Engineering"
   },
   "75822e8fa0a73f99710e5a0e68988ce3": {
     "city": "Chennai",
@@ -2858,6 +3148,11 @@
     "city": "Noida",
     "is_fresher": true,
     "role": "Human Resources"
+  },
+  "77d2f25d28fdfba17beab137d8e9c27c": {
+    "city": "Indore",
+    "is_fresher": true,
+    "role": "Other"
   },
   "783284dcaa2c17cea968f19ba67992a0": {
     "city": "Bengaluru",
@@ -2949,6 +3244,11 @@
     "is_fresher": true,
     "role": "Other"
   },
+  "7cf8849e986e246b1099277d7dba212e": {
+    "city": "Gurugram",
+    "is_fresher": true,
+    "role": "Finance & Accounting"
+  },
   "7d4bd98b6b343cf33d48a93c5513c9a3": {
     "city": "Multiple",
     "is_fresher": true,
@@ -2959,10 +3259,20 @@
     "is_fresher": true,
     "role": "Sales & Business Development"
   },
+  "7de273a47191d8ed01750046cdf4f750": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Software Engineering"
+  },
   "7ecd6f2232ace79826ae1e7a68f6b9e4": {
     "city": "Multiple",
     "is_fresher": true,
     "role": "Human Resources"
+  },
+  "7ee4fb138c98b46dd111d946c6b2c4cf": {
+    "city": "Remote",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
   },
   "7f18ad66a0fb4f65dbbe428648311a73": {
     "city": "Ahmedabad",
@@ -2974,6 +3284,11 @@
     "is_fresher": true,
     "role": "Other"
   },
+  "7ff13878d051a701ddcd07f9fbadfcc2": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "7ffd02aaf7ae84e8134537046cf7b826": {
     "city": "Chennai",
     "is_fresher": true,
@@ -2984,6 +3299,11 @@
     "is_fresher": true,
     "role": "Sales & Business Development"
   },
+  "80add2b75b52b88637f19a9a65d1c916": {
+    "city": "Ghaziabad",
+    "is_fresher": true,
+    "role": "Software Engineering"
+  },
   "80d1a92d4d938cdd800796c3d6e68ef6": {
     "city": "Pan India",
     "is_fresher": true,
@@ -2993,6 +3313,11 @@
     "city": "Jaipur",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "810055dc63f10c11f6489fc966d806c2": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Human Resources"
   },
   "817967c6e6c9f2b827950ec33e3f08d7": {
     "city": "Multiple",
@@ -3019,10 +3344,20 @@
     "is_fresher": true,
     "role": "Software Engineering"
   },
+  "8245c93ace9fbaff7e541d4cc3f55e4d": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "82b5dfc770929ddb0d5fc5918394758f": {
     "city": "Pan India",
     "is_fresher": true,
     "role": "QA & Testing"
+  },
+  "82f1f166a20b1b1099b40015931621d8": {
+    "city": "Coimbatore",
+    "is_fresher": true,
+    "role": "Operations & Support"
   },
   "833b1769e74703fc82ce41df21de90da": {
     "city": "Raipur",
@@ -3033,6 +3368,11 @@
     "city": "Pune",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "83f745caffa187dadebad21cea641eb6": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
   },
   "842ce2fd86503299da6e905dcf47f84e": {
     "city": "Remote",
@@ -3174,10 +3514,20 @@
     "is_fresher": true,
     "role": "Sales & Business Development"
   },
+  "89c613138f75e2aade66fea8264b0f99": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Software Engineering"
+  },
   "89d2b9afb267e4e045c6ae295596d5f3": {
     "city": "Coimbatore",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "89f5a6a4d0af9f9a635a066059144b32": {
+    "city": "Remote",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
   },
   "8a15df6073daadb6d32efd1ba505e5b2": {
     "city": "Hyderabad",
@@ -3274,6 +3624,11 @@
     "is_fresher": true,
     "role": "Marketing & Growth"
   },
+  "8e0377367bf64c79493e7f410249f9c3": {
+    "city": "Hyderabad",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
+  },
   "8e4cd70a1210f4e01e9d489be55d16ba": {
     "city": "Pan India",
     "is_fresher": true,
@@ -3334,6 +3689,11 @@
     "is_fresher": true,
     "role": "Operations & Support"
   },
+  "90692a4e23f6e1bc4e133e49e3a528e5": {
+    "city": "Coimbatore",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "90bcc69e9c9dc76453865f416407b64a": {
     "city": "Bengaluru",
     "is_fresher": true,
@@ -3359,6 +3719,11 @@
     "is_fresher": true,
     "role": "Software Engineering"
   },
+  "92137a3b3ba2c6744b988c4604f208b7": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "921f34ef57cf6c7fa5074ea56e370657": {
     "city": "Gurugram",
     "is_fresher": true,
@@ -3379,6 +3744,11 @@
     "is_fresher": true,
     "role": "Operations & Support"
   },
+  "92a2973aa8ea48963bca37488ba42b04": {
+    "city": "Mumbai",
+    "is_fresher": true,
+    "role": "Finance & Accounting"
+  },
   "92c8e8782f1a6d971ff766441177a5ae": {
     "city": "Bengaluru",
     "is_fresher": true,
@@ -3398,6 +3768,11 @@
     "city": "Mumbai",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "93db156a9c82760aac9d8bfe735a66cd": {
+    "city": "Kanpur",
+    "is_fresher": true,
+    "role": "Marketing & Growth"
   },
   "942501c33d94f74faf35fb1ba31c97ec": {
     "city": "Pan India",
@@ -3474,6 +3849,11 @@
     "is_fresher": true,
     "role": "Data Engineering"
   },
+  "96ced03cb27a51187e341cbf0a094609": {
+    "city": "Pune",
+    "is_fresher": true,
+    "role": "Marketing & Growth"
+  },
   "96d4325a2a2a01a8f8f005f73c4b60ef": {
     "city": "Bengaluru",
     "is_fresher": true,
@@ -3528,6 +3908,11 @@
     "city": "Thiruvananthapuram",
     "is_fresher": true,
     "role": "Software Engineering"
+  },
+  "9912257ffecebf0266030b4a17f5c721": {
+    "city": "Raipur",
+    "is_fresher": true,
+    "role": "Other"
   },
   "993de4a08dc702aea12d40155fd29d29": {
     "city": "Ranchi",
@@ -3604,6 +3989,11 @@
     "is_fresher": true,
     "role": "Operations & Support"
   },
+  "9d05f3de3f8e928f21d46d506f93aadb": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Human Resources"
+  },
   "9d0d63a30cdee485472dcda584a0eead": {
     "city": "Gurugram",
     "is_fresher": true,
@@ -3613,6 +4003,11 @@
     "city": "Gurugram",
     "is_fresher": true,
     "role": "Software Engineering"
+  },
+  "9d1e2a1b9e573a41710899a365abf605": {
+    "city": "Coimbatore",
+    "is_fresher": true,
+    "role": "QA & Testing"
   },
   "9d352ad846ec49b5f6f205c2c79fb683": {
     "city": "Bengaluru",
@@ -3633,6 +4028,11 @@
     "city": "Pune",
     "is_fresher": true,
     "role": "Marketing & Growth"
+  },
+  "9db3c86c8ec895bbc2507f40a7da5107": {
+    "city": "Ahmedabad",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
   },
   "9dd5c14ef75ab2fcb4bc839a414c301b": {
     "city": "Remote",
@@ -3874,6 +4274,11 @@
     "is_fresher": true,
     "role": "Operations & Support"
   },
+  "a5feb4bfc464ace019ef18ab45eea901": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "a602c2bb8189623a1f5c3ea00945a58b": {
     "city": "Chennai",
     "is_fresher": true,
@@ -3883,6 +4288,11 @@
     "city": "Coimbatore",
     "is_fresher": true,
     "role": "Software Engineering"
+  },
+  "a6be19636686894484e809c50e7810da": {
+    "city": "Multiple",
+    "is_fresher": true,
+    "role": "QA & Testing"
   },
   "a6faf448160f458e7b0910c81f40fd53": {
     "city": "Bengaluru",
@@ -3939,6 +4349,11 @@
     "is_fresher": true,
     "role": "Data Science & Analytics"
   },
+  "a96d0d0b99295ec3d48bd7d2ac8832d4": {
+    "city": "Goa",
+    "is_fresher": true,
+    "role": "Marketing & Growth"
+  },
   "a9874ff550ccb80ec6d340d3696b8c21": {
     "city": "Pan India",
     "is_fresher": true,
@@ -3963,6 +4378,11 @@
     "city": "Vadodara",
     "is_fresher": true,
     "role": "Sales & Business Development"
+  },
+  "abb5550c114f96ee8e536a4468cdc7e2": {
+    "city": "Hyderabad",
+    "is_fresher": true,
+    "role": "Operations & Support"
   },
   "abef616e57b6db3073d66a9e75f8bae3": {
     "city": "Multiple",
@@ -4008,6 +4428,11 @@
     "city": "Pan India",
     "is_fresher": true,
     "role": "QA & Testing"
+  },
+  "ade45ee2441b8612e08af3c4374af117": {
+    "city": "Remote",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
   },
   "ae48ad66cd918752ab232d6fd1e6ef53": {
     "city": "Bengaluru",
@@ -4169,6 +4594,11 @@
     "is_fresher": true,
     "role": "Operations & Support"
   },
+  "b4383990b93c114f6fe1b25488f3a135": {
+    "city": "Kolkata",
+    "is_fresher": true,
+    "role": "Finance & Accounting"
+  },
   "b438d18be78b89d8bca315313da858df": {
     "city": "Bengaluru",
     "is_fresher": true,
@@ -4183,6 +4613,11 @@
     "city": "Multiple",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "b4b4de79031dda367cceb271e79de0c7": {
+    "city": "Pune",
+    "is_fresher": true,
+    "role": "Human Resources"
   },
   "b4f3a6bccbe2e3192c75aaa7d35b26fa": {
     "city": "Pan India",
@@ -4279,6 +4714,11 @@
     "is_fresher": true,
     "role": "Operations & Support"
   },
+  "b9297d3c319767942f0454fc76c82a63": {
+    "city": "Jaipur",
+    "is_fresher": true,
+    "role": "Software Engineering"
+  },
   "b9f8aa19063c8b134ae5f99a21d25acd": {
     "city": "Hyderabad",
     "is_fresher": true,
@@ -4324,6 +4764,11 @@
     "is_fresher": true,
     "role": "Operations & Support"
   },
+  "bcfbf22b1ab8adffaf291d0e5161f4f5": {
+    "city": "Remote",
+    "is_fresher": true,
+    "role": "Marketing & Growth"
+  },
   "bd0b5cb7cd7c380ba434c7075493208e": {
     "city": "Remote",
     "is_fresher": true,
@@ -4344,6 +4789,11 @@
     "is_fresher": true,
     "role": "Marketing & Growth"
   },
+  "be0d4c79dd6a2fbed0c8427f112e5a10": {
+    "city": "Delhi",
+    "is_fresher": true,
+    "role": "Security Engineering"
+  },
   "be2baba70ac64c30cee420c60a1f93dd": {
     "city": "Bengaluru",
     "is_fresher": true,
@@ -4353,6 +4803,11 @@
     "city": "Vadodara",
     "is_fresher": true,
     "role": "Marketing & Growth"
+  },
+  "beb92b92216fd9f591807b5275f26adf": {
+    "city": "Mumbai",
+    "is_fresher": true,
+    "role": "Finance & Accounting"
   },
   "bebbd19e2e2a109f8c15b27737a3846f": {
     "city": "Pan India",
@@ -4393,6 +4848,16 @@
     "city": "Bengaluru",
     "is_fresher": true,
     "role": "Marketing & Growth"
+  },
+  "c1283eb730362462efff575a5df8c2bd": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
+  },
+  "c15098aad1f7304af92b488161aa5577": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Other"
   },
   "c151bbdefb6a3689a97e56c4a6624655": {
     "city": "Bengaluru",
@@ -4439,8 +4904,18 @@
     "is_fresher": true,
     "role": "Sales & Business Development"
   },
+  "c2a1124834674b564d46bc748941f420": {
+    "city": "Hyderabad",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "c2aa5d6263aa5be50d3e96a792bf2468": {
     "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Software Engineering"
+  },
+  "c2b61398b7acd51d3a30a883543ae4fa": {
+    "city": "Chandigarh",
     "is_fresher": true,
     "role": "Software Engineering"
   },
@@ -4458,6 +4933,11 @@
     "city": "Multiple",
     "is_fresher": true,
     "role": "Sales & Business Development"
+  },
+  "c36ec2bda565a699165cec1d4cef0a08": {
+    "city": "Remote",
+    "is_fresher": true,
+    "role": "Finance & Accounting"
   },
   "c371a08d96677019aaf1649b65089ad1": {
     "city": "Multiple",
@@ -4574,6 +5054,11 @@
     "is_fresher": true,
     "role": "Sales & Business Development"
   },
+  "ca11e396695551badac1ba33ffacfcc0": {
+    "city": "Pune",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
+  },
   "caaabd5da194aad2c6c632a3c04b362a": {
     "city": "Pan India",
     "is_fresher": true,
@@ -4648,6 +5133,11 @@
     "city": "Multiple",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "cdfbace361986cff246eab79b841dd35": {
+    "city": "Pune",
+    "is_fresher": true,
+    "role": "Marketing & Growth"
   },
   "ce0bcda67076157fd24a6e7727b9b930": {
     "city": "Multiple",
@@ -4729,10 +5219,20 @@
     "is_fresher": true,
     "role": "Operations & Support"
   },
+  "d1e09abd14aca51a8ba1ba70b303a111": {
+    "city": "Visakhapatnam",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "d24d959f7e6989072bc584d132d64adf": {
     "city": "Multiple",
     "is_fresher": true,
     "role": "QA & Testing"
+  },
+  "d2c9c03a9a83c6ba6bb63be7dfc298c1": {
+    "city": "Chennai",
+    "is_fresher": true,
+    "role": "Marketing & Growth"
   },
   "d2d7fced0f31309fd5c938ff9a9beb70": {
     "city": "Indore",
@@ -4746,6 +5246,11 @@
   },
   "d383441abe19509efc72e681e768312d": {
     "city": "Ahmedabad",
+    "is_fresher": true,
+    "role": "Software Engineering"
+  },
+  "d3b16ca007f61a4928f6c960727b57cd": {
+    "city": "Hyderabad",
     "is_fresher": true,
     "role": "Software Engineering"
   },
@@ -4814,6 +5319,11 @@
     "is_fresher": true,
     "role": "Operations & Support"
   },
+  "d5dc83739c8630ca6ff930817c4994db": {
+    "city": "Goa",
+    "is_fresher": true,
+    "role": "Marketing & Growth"
+  },
   "d60ca78f00c41b2b821b34286846f651": {
     "city": "Pan India",
     "is_fresher": true,
@@ -4828,6 +5338,11 @@
     "city": "Delhi",
     "is_fresher": true,
     "role": "Sales & Business Development"
+  },
+  "d68590cbd3f3d814613923f6ac9c75ce": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Other"
   },
   "d6a97e4adcb16ac2bb246f42b2dec846": {
     "city": "Mumbai",
@@ -4853,6 +5368,11 @@
     "city": "Pune",
     "is_fresher": true,
     "role": "Finance & Accounting"
+  },
+  "d7912b644bd0067f3cf2b4f011043562": {
+    "city": "Hyderabad",
+    "is_fresher": true,
+    "role": "Backend Engineering"
   },
   "d7a9e0eb589a8ccbed59252d628f0b37": {
     "city": "Remote",
@@ -4994,6 +5514,11 @@
     "is_fresher": true,
     "role": "Human Resources"
   },
+  "dda3490ff287182eb70d56bda1257c35": {
+    "city": "Coimbatore",
+    "is_fresher": true,
+    "role": "Operations & Support"
+  },
   "ddc533981e11cf3cb82164d85b1e047c": {
     "city": "Gurugram",
     "is_fresher": true,
@@ -5038,6 +5563,11 @@
     "city": "Gurugram",
     "is_fresher": true,
     "role": "Software Engineering"
+  },
+  "dee5697585e60e4265ae467d765716e8": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Operations & Support"
   },
   "df46e288e06d8d8a686b47fc6db01909": {
     "city": "Kochi",
@@ -5129,6 +5659,11 @@
     "is_fresher": true,
     "role": "QA & Testing"
   },
+  "e2b163ea421f01ab10eb68b89a943ace": {
+    "city": "Bhopal",
+    "is_fresher": true,
+    "role": "Security Engineering"
+  },
   "e2bb9cc8df10978b9d8e6c482612f551": {
     "city": "Multiple",
     "is_fresher": false,
@@ -5154,6 +5689,11 @@
     "is_fresher": true,
     "role": "Design (UI/UX)"
   },
+  "e3940a96f2bb09b9a849f9b85788727c": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
+  },
   "e3f774ad259e9fcfa6178b12c968ef7b": {
     "city": "Pan India",
     "is_fresher": true,
@@ -5163,6 +5703,11 @@
     "city": "Remote",
     "is_fresher": true,
     "role": "Marketing & Growth"
+  },
+  "e4375815643c9bb4ae599967c0a4e9cb": {
+    "city": "Goa",
+    "is_fresher": true,
+    "role": "Software Engineering"
   },
   "e4529f8ab808dacb8efd92a47d096017": {
     "city": "Pune",
@@ -5191,6 +5736,11 @@
   },
   "e5b558782ca04b417599229a8df6b3c8": {
     "city": "Coimbatore",
+    "is_fresher": true,
+    "role": "Other"
+  },
+  "e5d1ecf66dcd0e9bc76bc8db1f388ca1": {
+    "city": "Pan India",
     "is_fresher": true,
     "role": "Other"
   },
@@ -5284,8 +5834,18 @@
     "is_fresher": true,
     "role": "Marketing & Growth"
   },
+  "e897c65ce1cf14523a5178f891935720": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Marketing & Growth"
+  },
   "e8dd9b78bfa7cd0091650ab3ff611124": {
     "city": "Pan India",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
+  },
+  "e8e9cb0418fd64882668d88e01b261d0": {
+    "city": "Coimbatore",
     "is_fresher": true,
     "role": "Sales & Business Development"
   },
@@ -5338,6 +5898,11 @@
     "city": "Coimbatore",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "eae9f8d029d8aff28787da7e4c135048": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Data Science & Analytics"
   },
   "eaf4cee71928c759a8d0f4ae2b7aa301": {
     "city": "Mumbai",
@@ -5409,10 +5974,25 @@
     "is_fresher": true,
     "role": "Human Resources"
   },
+  "ee02110c2b98f9a9a0604062f3ce6c39": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Other"
+  },
   "ee22e74585ca62c29379fddfef46fbba": {
     "city": "Hyderabad",
     "is_fresher": true,
     "role": "Marketing & Growth"
+  },
+  "ee35b1bd911075040ce280682b834f0d": {
+    "city": "Mumbai",
+    "is_fresher": true,
+    "role": "DevOps & Infrastructure"
+  },
+  "ee94e8141d8eceba046b11cef11873cb": {
+    "city": "Pune",
+    "is_fresher": true,
+    "role": "Human Resources"
   },
   "eead1f42ad255250e3e518618dc5d084": {
     "city": "Kolkata",
@@ -5443,6 +6023,11 @@
     "city": "Mumbai",
     "is_fresher": true,
     "role": "Design (UI/UX)"
+  },
+  "ef88c9286006cb03730c7d1a88fdd849": {
+    "city": "Multiple",
+    "is_fresher": true,
+    "role": "Sales & Business Development"
   },
   "ef9c20f36fa37ebe788e438a122e1057": {
     "city": "Bengaluru",
@@ -5594,6 +6179,11 @@
     "is_fresher": true,
     "role": "Other"
   },
+  "f4305f8a4bc1cf37aaed8f0f225f5443": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Software Engineering"
+  },
   "f465128e669d39e80395c2d6483d74eb": {
     "city": "Chennai",
     "is_fresher": true,
@@ -5644,6 +6234,11 @@
     "is_fresher": true,
     "role": "Software Engineering"
   },
+  "f724914d724ae25790b1b6abdb6eba39": {
+    "city": "Jaipur",
+    "is_fresher": true,
+    "role": "Marketing & Growth"
+  },
   "f72cc78b2e2ac10b218956373bdebffd": {
     "city": "Mysuru",
     "is_fresher": true,
@@ -5689,6 +6284,11 @@
     "is_fresher": true,
     "role": "Data Science & Analytics"
   },
+  "f936e040da82b2ff76d7f19c479ed452": {
+    "city": "Pan India",
+    "is_fresher": true,
+    "role": "Finance & Accounting"
+  },
   "f9ce57304eba80246ad3670d8ca2c4c3": {
     "city": "Pune",
     "is_fresher": true,
@@ -5728,6 +6328,11 @@
     "city": "Pan India",
     "is_fresher": true,
     "role": "Operations & Support"
+  },
+  "fa7024f3bebaebb4b942aa5b93b3a8a4": {
+    "city": "Bengaluru",
+    "is_fresher": true,
+    "role": "Human Resources"
   },
   "fb015e0e22bfcf338f7737d4a8b22f80": {
     "city": "Remote",
