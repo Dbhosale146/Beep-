@@ -85,7 +85,23 @@ python scripts/score_eval.py data/eval_sample.csv
 > always computed from prices I checked today. And it bills thinking tokens as
 > output, because Gemini charges them at the output rate."
 
-Then accuracy, from your hand-check of the 50 posts.
+Then accuracy:
+
+> "**Role 92%, city 82%, is_fresher 98%** on 50 posts I checked against the live
+> listings. But the interesting number is zero: **none of the nine city errors
+> is the model ignoring the prompt.** Six are postings where Adzuna's search API
+> returned only 'India' and the detail page had the real city — the model
+> answered 'Pan India', which is exactly what my prompt tells it to do. Three
+> are cities missing from my taxonomy. Both are my bugs.
+>
+> The four role errors are real: the model over-weights a technical word in the
+> title. 'Robotics Engineer Fresher' turned out to be teaching robotics to
+> eight-year-olds. The fix isn't a better prompt — it only sees the first 600
+> characters of the description, and the giveaway was below the cut."
+
+Worth adding if you have the time: **5 of those 50 listings had already been
+taken down** when I checked them days later. That is the case for a scheduled
+refresh, measured rather than assumed.
 
 > "A content-hash cache means a run only pays for postings it has not seen.
 > Second run: 571 of 572 from cache, **cost zero**, 310 seconds down to 21."

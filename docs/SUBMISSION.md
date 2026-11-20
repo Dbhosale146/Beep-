@@ -53,31 +53,83 @@ fuzzy title within a company 50.
 
 ## 3. Tagging accuracy
 
-> **TO COMPLETE BEFORE SUBMITTING.** `backend/data/eval_sample.csv` holds 50
-> posts sampled stratified by source with a fixed seed. Fill in the `true_role`,
-> `true_city` and `true_is_fresher` columns, then run:
->
-> ```
-> cd backend && python scripts/score_eval.py data/eval_sample.csv
-> ```
->
-> Paste the output here: role accuracy, city accuracy, is_fresher accuracy,
-> and the confusion list it prints.
+**50 posts, every one opened on its live source page** and compared against the
+model's three tags.
+
+| Metric | Result | 95% CI |
+|---|---|---|
+| **Role accuracy** | **46/50 = 92%** | 81–97% |
+| **City accuracy** | **41/50 = 82%** | 69–90% |
+| **`is_fresher` accuracy** | **49/50 = 98%** | 90–100% |
+| Role *and* city both correct | 38/50 = 76% | 63–86% |
+| All three correct | 37/50 = 74% | 60–84% |
+
+Full sheet: `backend/data/eval_sample_labelled.csv`, one row per post with the
+live-page evidence in the `notes` column.
 
 **How the sample was drawn.** `scripts/sample_for_eval.py` takes 50 posts
-stratified by source with `--seed 42`, so the sample is reproducible and anyone
-can regenerate exactly the same 50. Without stratification Adzuna would supply
-~98% of the sample and it would say nothing about the company boards.
+stratified by source with `--seed 42`, so anyone can regenerate exactly the same
+50. Without stratification Adzuna would supply ~98% of the sample and it would
+say nothing about the company boards. The CSV puts the model's answers in
+`model_*` columns and the truth in `true_*` columns beside them, so the two can
+never be confused.
 
-The CSV puts the model's answers in `model_*` columns and leaves `true_*`
-columns blank beside them, so the two can never get mixed up. `score_eval.py`
-scores only the rows that were actually labelled and reports the rest as
-unlabelled rather than counting them as correct.
+### None of the 9 city errors is a tagging error
 
-**One error already known.** A posting located at *"Warje, Pune"* is tagged
-`city: Multiple`. Warje is a Pune suburb, and the prompt explicitly says a
-suburb counts as its city, so the model got this one wrong. It was found by
-accident while testing search. The hand-check is how you find the rest.
+This is the result worth reading twice. Checked against *what the model was
+actually given*, every one of the nine wrong cities is the model correctly
+following the prompt on incomplete input.
+
+| Cause | Count | The model saw | It answered | Truth on the live page |
+|---|---|---|---|---|
+| Source data was country-only | **6** | `raw_location: "India"` | `Pan India` — the documented rule | Delhi, Delhi, Delhi, Mumbai, Bengaluru, Halol |
+| City missing from my taxonomy | **3** | `Anand, Gujarat` · `Rewari, Haryana` · `Daman, Daman and Diu` | `Multiple` — the documented fallback | Anand, Bawal, Daman |
+| **Model ignored the prompt** | **0** | — | — | — |
+
+Both causes are mine, not the model's, and both are fixable without touching the
+prompt:
+
+1. **Enrich location from the detail page.** Adzuna's *search* endpoint returns
+   `"India"` for some listings whose *detail* page names the city. The pipeline
+   trusts the search response. Fixing this recovers 6 of 9.
+2. **Add Anand, Bawal and Daman** to `config/taxonomy.yaml` — the same class of
+   bug as the earlier "170 posts tagged Multiple", which was also my list of
+   India being too short.
+
+### The four role errors are real model errors
+
+| # | Title | Tagged | Should be | Why |
+|---|---|---|---|---|
+| 9 | Robotics Engineer Fresher | Software Engineering | Other | Teaches robotics classes to children aged 8–16 |
+| 18 | Young Leader (YL) Trainee | Operations & Support | Other | A two-year education fellowship at a non-profit |
+| 22 | AI Artist Interns | Machine Learning & AI | Design (UI/UX) | Makes images and video with generative tools — creative, not ML engineering |
+| 41 | Manufacturing Engineering Intern | Software Engineering | Other | Mechanical: CAD and robot assembly |
+
+**One failure mode, four times.** The model weights a technical word in the
+title above what the description says — `Robotics`, `AI`, `Engineering` all
+pulled it toward an engineering category. The fix is not a better prompt: it
+sees only the first 600 characters of the description
+(`llm_description_chars`, which drives cost directly), and in all four cases the
+disqualifying detail is below that cut. That is a cost/accuracy dial, and this
+evaluation is what tells me where it is currently set wrong.
+
+### The single `is_fresher` error
+
+Post 49, a Paytm listing from **Lever** rather than Adzuna. The requirements say
+*"1+ years experience in customer support"*; the model called it fresher. The
+title — `CST - Associate - Bill Payments CST` — carries no experience signal, so
+the keyword filter passed it through and the model had to judge from the
+description alone.
+
+### Two findings that are not accuracy
+
+- **5 of the 50 listings had already been removed** from Adzuna by the time they
+  were checked, days after collection. That turns "it should refresh on a
+  schedule" from an assumption into a measured 10% decay.
+- **One post is a likely scam** (post 31 offers jobs "through backdoor process").
+  The pipeline filters for *relevance*, not *quality*. For a product aimed at
+  students, that is the more important gap.
+
 
 ---
 

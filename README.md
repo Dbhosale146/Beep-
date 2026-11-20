@@ -16,7 +16,7 @@
 |---|---|
 | **Posts published** | **562** (from 6,551 raw, run of 2026-11-20) |
 | **Duplicates removed** | **501** across three layers |
-| **Tag accuracy** (50 hand-checked) | <!-- TODO: fill — run scripts/score_eval.py --> |
+| **Tag accuracy** (50 checked against live listings) | **role 92%** · **city 82%** · **is_fresher 98%** |
 | **Cost per 1,000 posts** | **$0.1588** |
 
 Supporting numbers: 18 role categories, 38 distinct cities in the current
@@ -255,22 +255,74 @@ apart.
 
 ## 📊 Evaluation
 
-50 posts drawn with `scripts/sample_for_eval.py`, hand-labelled, scored with
-`scripts/score_eval.py`.
+50 posts drawn with `scripts/sample_for_eval.py`. **Every listing was opened on
+its live source page** and the model's three tags compared against it.
 
-- **Sampling method:** <!-- TODO: fill — random, or stratified by source -->
-- **Role accuracy:** <!-- TODO: fill — x/50 = % -->
-- **City accuracy:** <!-- TODO: fill — x/50 = % -->
-- **Both correct:** <!-- TODO: fill — x/50 = % -->
-- **`is_fresher` accuracy:** <!-- TODO: fill — x/50 = % -->
-- **Labelled sheet:** <!-- TODO: fill — link -->
-
-**Error types observed so far:**
-
-| Error | Example | Status |
+| Metric | Result | 95% CI |
 |---|---|---|
-| A suburb is not resolved to its city | A posting at *"Warje, Pune"* tagged `Multiple`, although the prompt says a suburb counts as its city | Known, unfixed. The fix means bumping the prompt version, which invalidates the entire tag cache |
-| <!-- TODO: fill from the labelled sheet --> | | |
+| **Role accuracy** | **46/50 = 92%** | 81–97% |
+| **City accuracy** | **41/50 = 82%** | 69–90% |
+| **`is_fresher` accuracy** | **49/50 = 98%** | 90–100% |
+| Role *and* city both correct | 38/50 = 76% | 63–86% |
+| All three correct | 37/50 = 74% | 60–84% |
+
+Labelled sheet: [`backend/data/eval_sample_labelled.csv`](backend/data/eval_sample_labelled.csv)
+— one row per post with the live-page evidence in the `notes` column.
+
+### The finding that matters: none of the 9 city errors is a tagging error
+
+Checked against what the model was actually given, **every one of the nine
+"wrong" cities is the model correctly following the prompt on incomplete
+input.**
+
+| Cause | Count | What the model saw | What it answered | Truth |
+|---|---|---|---|---|
+| **Source data was country-only** | **6** | `raw_location: "India"` | `Pan India` — the documented rule for a country-only location | A real city on the live page (Delhi ×2, Mumbai, Bengaluru, Halol, Delhi) |
+| **City missing from the taxonomy** | **3** | `Anand, Gujarat` · `Rewari, Haryana` · `Daman, Daman and Diu` | `Multiple` — the documented fallback for a city not in the list | Anand · Bawal · Daman |
+| **Model ignored the prompt** | **0** | — | — | — |
+
+Both causes are fixable without touching the prompt or the model:
+
+1. **Enrich the location from the detail page.** Adzuna's *search* endpoint
+   returns `"India"` for some listings while the detail page names the city.
+   The pipeline currently trusts the search response. Fetching the detail page
+   for country-only locations would recover 6 of 9.
+2. **Add the three missing cities** to `config/taxonomy.yaml`. This is the same
+   class of bug as the earlier "170 posts tagged Multiple" one — my list of
+   India, not the model's reading of it.
+
+### The four role errors are genuine model errors
+
+| # | Title | Tagged | Should be | Why it was wrong |
+|---|---|---|---|---|
+| 9 | Robotics Engineer Fresher | Software Engineering | Other | Teaching robotics classes to children aged 8–16 |
+| 18 | Young Leader (YL) Trainee | Operations & Support | Other | A two-year education fellowship at a non-profit |
+| 22 | AI Artist Interns | Machine Learning & AI | Design (UI/UX) | Creates images and video with generative tools — creative work, not ML engineering |
+| 41 | Manufacturing Engineering Intern | Software Engineering | Other | Mechanical work: CAD and robot assembly |
+
+**One failure mode, four times: the model weights a technical word in the title
+above what the description actually says.** `Robotics`, `AI`, `Engineering` all
+pulled it toward an engineering category when the body text said otherwise. The
+fix is not a better prompt — it is giving the model more of the description. It
+currently sees the first 600 characters (`llm_description_chars`), and in all
+four cases the disqualifying detail sits further down.
+
+### The one `is_fresher` error
+
+Post 49, a Paytm listing from **Lever**, not Adzuna: the requirements say
+*"1+ years experience in customer support"* and the model called it a fresher
+role. The title `CST - Associate - Bill Payments CST` carries no experience
+signal, so the keyword filter passed it through and the model had to decide
+from the description alone.
+
+### Two things the evaluation surfaced that are not accuracy
+
+- **5 of 50 listings had already been removed** from Adzuna by the time they
+  were checked, days after collection. That is the argument for a scheduled
+  refresh stated as a measured number rather than an assumption.
+- **One listing is a likely scam** (post 31: offers jobs "through backdoor
+  process"). The pipeline has no quality filter, only a relevance filter. For a
+  product aimed at students, that is a gap worth naming.
 
 Reproduce:
 
@@ -304,7 +356,7 @@ python scripts/cost_report.py --input-price 0.30 --output-price 2.50
 | Output cost | 53,988 ÷ 1,000,000 × $2.50 = **$0.1350** |
 | Total | $0.0813 + $0.1350 = **$0.2163** for 1,362 posts |
 | **Cost per 1,000 posts** | $0.2163 ÷ 1,362 × 1,000 = **$0.1588** |
-| In ₹ | <!-- TODO: fill — multiply by today's USD/INR rate --> |
+| In ₹ | **₹14.82** per 1,000 posts (at $1 = ₹93.29, xe.com mid-market, 2026-11-20) |
 | Hosting and everything else | **$0** — Render free tier, GitHub Pages, GitHub Actions (free on public repos) |
 
 **Thinking tokens bill at the output rate**, so the report counts them as output
@@ -554,23 +606,35 @@ docs/                 build_log.md - SUBMISSION.md - loom_script.md
    4,601 raw postings and 3 survivors, because those boards are mostly US
    companies. The fix is research — finding Indian companies that use these ATS
    boards — not code. This is the first thing I would do next.
-2. **The Adzuna free quota caps the refresh rate** at two full fetches a day. A
+2. **Location is trusted from the search response.** Adzuna's search endpoint
+   returns `"India"` for some listings whose detail page names a real city. That
+   single gap causes **6 of the 9 city errors** in the evaluation. Fetching the
+   detail page for country-only locations is the highest-value fix in this list.
+3. **Three cities from the sample are missing from the taxonomy** — Anand, Bawal
+   and Daman — causing the other 3 city errors. A one-line config change each.
+4. **The model sees only the first 600 characters of a description**
+   (`llm_description_chars`, which drives cost directly). All four role errors
+   are cases where the disqualifying detail sits below that cut.
+5. **There is no quality filter, only a relevance filter.** One post in the
+   sample of 50 is a likely paid-placement scam. For a product aimed at
+   students, that matters more than a percentage point of accuracy.
+6. **The Adzuna free quota caps the refresh rate** at two full fetches a day. A
    genuinely high-frequency refresh needs either a paid plan or a thinner fetch
    that accumulates across runs instead of replacing. I attempted the latter and
    reverted it — see the last row of
    [What broke](#️-what-broke--how-i-fixed-it).
-3. **The search contract exists twice**, in Python and JavaScript. It is diffed
+7. **The search contract exists twice**, in Python and JavaScript. It is diffed
    across 20 query sets, but it is still duplication, and a third consumer would
    be the point to extract it properly.
-4. **No database.** Correct at 562 posts, wrong at 100k. `jobs.json` is read
+8. **No database.** Correct at 562 posts, wrong at 100k. `jobs.json` is read
    fully into memory when the API starts.
-5. **No description-level de-duplication.** Two genuinely different postings with
+9. **No description-level de-duplication.** Two genuinely different postings with
    identical descriptions are both kept.
-6. **`is_fresher` is judged from the post text alone**, so a vague posting that
+10. **`is_fresher` is judged from the post text alone**, so a vague posting that
    never states an experience level can slip through.
-7. **The suburb bug is known and unfixed** — see [Evaluation](#-evaluation). The
+11. **The suburb bug is known and unfixed** — see [Evaluation](#-evaluation). The
    fix needs a prompt-version bump that invalidates the whole tag cache.
-8. **Accuracy is measured on 50 posts.** Enough to spot systematic errors, not
+12. **Accuracy is measured on 50 posts.** Enough to spot systematic errors, not
    enough for a tight confidence interval.
 
 ---
@@ -581,6 +645,7 @@ docs/                 build_log.md - SUBMISSION.md - loom_script.md
 |---|---|
 | **Gemini 3.5 Flash Lite** | The product itself — tagging role, city and `is_fresher`. The only model in the pipeline |
 | **Claude Code** | Implementation assistance: scaffolding, refactors, test writing, and this README |
+| **Claude (browsing)** | Opening each of the 50 evaluation listings on its live source page and drafting the ground-truth labels from what those pages said |
 
 **Decisions that were mine, not the tool's:** official APIs over scraping;
 running keyword filters and de-duplication *before* the LLM so the expensive
