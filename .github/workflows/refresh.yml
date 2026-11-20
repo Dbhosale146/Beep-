@@ -1,9 +1,19 @@
-name: daily refresh
+name: refresh job data
 
 on:
   schedule:
-    # 01:30 UTC = 07:00 IST, so the data is fresh when students wake up.
-    - cron: "30 1 * * *"
+    # Every 12 hours: 01:30 and 13:30 UTC = 07:00 and 19:00 IST, so the data is
+    # fresh both when students wake up and after the working day.
+    #
+    # Why not more often: each run makes 42 Adzuna calls (7 queries x 6 pages)
+    # and the free tier is roughly 2,500 calls a month. Two runs a day is 84 a
+    # day, ~2,520 a month -- the most a full fetch can sustain. Adzuna supplies
+    # ~98% of published posts, and a throttled fetch would publish a nearly
+    # empty page rather than failing loudly, so this limit is not optional.
+    #
+    # GitHub runs scheduled workflows on a best-effort basis and delays them
+    # under load, so treat the times as intent, not a guarantee.
+    - cron: "30 1,13 * * *"
   workflow_dispatch:        # manual trigger from the Actions tab
 
 permissions:
@@ -56,7 +66,7 @@ jobs:
       # Committing the data is what refreshes the deployed API: the API reads
       # these files from the repo, and a push to main makes the host redeploy
       # it. The frontend is a separate deploy and only needs rebuilding when
-      # its own code changes, but rebuilding daily costs nothing.
+      # its own code changes, but rebuilding each run costs nothing.
       - name: Commit refreshed data
         run: |
           git config user.name "github-actions[bot]"
@@ -68,7 +78,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "no data changes to commit"
           else
-            git commit -m "data: daily refresh $(date -u +%Y-%m-%d)"
+            git commit -m "data: refresh $(date -u +%Y-%m-%dT%H:%MZ)"
             git push
           fi
 
@@ -83,7 +93,7 @@ jobs:
       #
       # Leave it unset and the published page searches the dataset that
       # "npm run build" copies into the bundle -- so Pages alone is a complete,
-      # working, daily-refreshing site with no server to deploy or keep awake.
+      # working, self-refreshing site with no server to deploy or keep awake.
       #
       # Set it (Settings > Secrets and variables > Actions > Variables) to a
       # deployed API including /api, e.g. https://xxx.onrender.com/api, and the

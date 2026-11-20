@@ -16,7 +16,8 @@ Face on camera. No screen share yet.
 > "I built a tool that collects fresher and internship postings in India from
 > four public job-board APIs, removes duplicates, tags each one by role and city
 > with Gemini, and publishes them to a page that refreshes itself every morning
-> at 7am IST. 565 postings live right now, de-duplicated from 6,623 raw."
+> twice a day, 7am and 7pm IST. 562 postings live right now, de-duplicated
+> from 6,600+ raw."
 
 ## 0:25 — 1:15 · Show it working
 
@@ -86,12 +87,12 @@ python scripts/score_eval.py data/eval_sample.csv
 
 Then accuracy, from your hand-check of the 50 posts.
 
-> "A content-hash cache means a daily run only pays for postings it has not seen.
+> "A content-hash cache means a run only pays for postings it has not seen.
 > Second run: 571 of 572 from cache, **cost zero**, 310 seconds down to 21."
 
 ## 4:00 — 4:35 · It runs itself
 
-- GitHub Actions tab → the daily workflow, 07:00 IST.
+- GitHub Actions tab → the refresh workflow, 07:00 and 19:00 IST.
 - Say the failure rule plainly: **if the pipeline fails, the site still
   redeploys with yesterday's data so the page never goes blank — and the job is
   then marked failed so the failure is visible.**

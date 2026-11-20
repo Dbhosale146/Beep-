@@ -3,7 +3,7 @@
 Collects fresher and internship posts in India from official public job-board
 APIs, de-duplicates them, tags each one by role and city with an LLM, serves
 them over an HTTP search API, and shows them on a React job board that
-refreshes itself daily.
+refreshes itself twice a day.
 
 **Current numbers** (pipeline run of 2026-11-16, API measured 2026-11-17):
 
@@ -30,7 +30,7 @@ Build notes, including everything that broke: [docs/build_log.md](docs/build_log
 Two halves, two folders, nothing shared between them except the HTTP contract.
 
 ```
-backend/      Python: the daily pipeline and the API that serves its output
+backend/      Python: the refresh pipeline and the API that serves its output
 frontend/     React + Vite: the job board
 docs/         build log
 ```
@@ -144,7 +144,7 @@ against `config/taxonomy.yaml`; one retry on failure, then the post is marked
 `Untagged`. **Nothing is ever guessed.**
 
 Results are cached in `data/tag_cache.json` by a hash of
-title + company + location + description + prompt version, so a daily run only
+title + company + location + description + prompt version, so a run only
 pays for posts it has not seen. In practice: 571 of 572 posts came from cache
 on the second run.
 
@@ -372,7 +372,7 @@ which one answered.
 **Why bother with two.** GitHub Pages cannot run Python. Without the local
 path, the published link — the one thing actually being graded — would be dead
 whenever the API is undeployed or asleep on a free tier. With it, Pages alone
-is a complete, instant, daily-refreshing site, and the API becomes an upgrade
+is a complete, instant, self-refreshing site, and the API becomes an upgrade
 switched on with one repository variable.
 
 The cost is real and worth stating plainly: the search exists twice, in Python
@@ -387,7 +387,7 @@ filters, sorting, paging and all three facet maps. If they ever disagree,
 2. Settings → Pages → Source: **GitHub Actions**.
 3. Settings → Secrets and variables → Actions → add secrets `ADZUNA_APP_ID`,
    `ADZUNA_APP_KEY`, `GEMINI_API_KEY`.
-4. Actions → *daily refresh* → **Run workflow**.
+4. Actions → *refresh job data* → **Run workflow**.
 
 **Adding the live API** (optional): deploy `backend/` anywhere that runs
 Python, starting `uvicorn api.main:app --host 0.0.0.0 --port $PORT` from
@@ -396,11 +396,19 @@ repository **variable** `API_BASE_URL` pointing at it including `/api`. The next
 build switches over. On a free tier the service sleeps when idle, which is why
 the static path is the default rather than the fallback.
 
-## Daily refresh
+## Refresh schedule
 
-`.github/workflows/daily.yml` runs at 01:30 UTC (07:00 IST) and on manual
-trigger: install, test, run pipeline, commit the data files, build the
-frontend, deploy to Pages.
+`.github/workflows/refresh.yml` runs every 12 hours (`30 1,13 * * *` — 07:00
+and 19:00 IST) and on manual trigger: install, test, run pipeline, commit the
+data files, build the frontend, deploy to Pages.
+
+**Why twice a day and not more often.** Each run makes 42 Adzuna calls
+(7 queries × 6 pages) and Adzuna's free tier allows roughly 2,500 calls a
+month. Two runs a day is 84 a day, ~2,520 a month — the most a full fetch can
+sustain. Adzuna supplies ~98% of published posts, and `fetch.py` logs a warning
+and continues when a call fails, so a throttled run would publish a nearly
+empty page instead of failing loudly. Running more often needs either a paid
+Adzuna plan or a thinner fetch that accumulates across runs.
 
 Committing the data is what refreshes the API — it reads those files from the
 repo, and the push makes the host redeploy it.

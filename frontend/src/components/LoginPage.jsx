@@ -50,7 +50,7 @@ export default function LoginPage({ auth, onSkip }) {
         {/* No job count here on purpose: nothing is fetched until after
             sign-in, so the wall has no number to show and does not pretend to. */}
         <p className="login-sub">
-          Internships and 0–1 year roles, refreshed every day. Sign in to browse.
+          Internships and 0–1 year roles, refreshed twice a day. Sign in to browse.
         </p>
 
         <ul className="login-points">

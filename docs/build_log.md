@@ -758,3 +758,72 @@ the UI.
     jsdom, configured build:    18/18 PASSED
     jsdom, unconfigured build:  18/18 PASSED
     backend:                    104 passed
+
+---
+
+## Phase 12 — the refresh rate, and an API quota that set it (2026-11-20)
+
+The ask was to refresh every 2 hours instead of every 24. The arithmetic said
+no, and working out why changed the schedule rather than the code.
+
+### What the numbers said
+
+The fetch is 7 Adzuna queries x 6 pages = **42 API calls per run**. At 12 runs
+a day that is **504 calls a day, ~15,000 a month**.
+
+Adzuna's own terms of service no longer publish free-tier numbers — they say
+limits "are shown in your account" and "we may vary limits from time to time."
+Their login page states the entry-level *paid* plan is 500 calls a day, so the
+free tier sits below that; the commonly cited figures are 250/day, 2,500/month.
+
+Taking 2,500/month: that pays for **59 full fetches a month**. Two a day. The
+requested schedule needed 360.
+
+### Why that was dangerous rather than merely wrong
+
+`fetch.py` logs a warning and continues when a call fails. A throttled run
+would therefore not crash — it would publish a near-empty `jobs.json`, quietly,
+and the site would fall below the 200-post requirement with nothing turning
+red. 528 of 536 published posts came from Adzuna, so losing Adzuna is losing
+the product.
+
+### The approach that did not work
+
+I tried to keep the 2-hour cadence by making each run fetch a thin slice
+(1 page per query, 7 calls) and **merge** it into the published dataset instead
+of replacing it, so the job count would accumulate rather than collapse.
+`pipeline/merge.py`, ~70 lines, 7 tests, all passing.
+
+The unit tests passed and the real run still fell over: **562 posts in,
+148 out.**
+
+The tests were the problem — they tested `merge()` in isolation, where it
+behaves exactly as designed. What they could not see is what the merged list
+does to the *rest* of the pipeline. Merging before the fresher filter and
+dedup meant 1,638 posts entering a dedup stage that had only ever seen one
+fetch's worth, and `layer1_exact` removed 465 of them. Carried posts went in
+and did not come out.
+
+That is the lesson worth keeping: **a passing unit test for a new stage says
+nothing about what that stage does to the stages after it.** The only test that
+would have caught this is the one I ran last instead of first — the real
+pipeline, end to end, with the real data.
+
+### What shipped
+
+Every 12 hours, full fetch, no new code:
+
+    cron: "30 1,13 * * *"      # 07:00 and 19:00 IST
+
+84 Adzuna calls a day, ~2,520 a month — the most a full fetch sustains. The
+merge was deleted rather than debugged, on deadline day, because the project's
+first constraint is code I can change live on a call. Accumulating across thin
+fetches is the right design for a genuinely high-frequency refresh; it is not
+a thing to land in the last hours before submitting.
+
+`daily.yml` was renamed `refresh.yml` anyway — a file named for a schedule it
+no longer has is the kind of small lie that costs someone an hour later. The
+word "daily" also appeared in the page header, the login page, the HTML meta
+description, the README and both submission documents; all now say twice a
+day, because a claim in the UI the cron does not back up is worse than no
+claim at all.

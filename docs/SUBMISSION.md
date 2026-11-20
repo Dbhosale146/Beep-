@@ -4,7 +4,7 @@
 
 A tool that collects fresher and internship postings in India from official
 public job-board APIs, removes duplicates, tags each post by role and city with
-an LLM, and publishes them to a searchable page that refreshes itself daily.
+an LLM, and publishes them to a searchable page that refreshes itself twice a day.
 
 ---
 
@@ -113,7 +113,7 @@ would understate the real cost.
    ever reached the model. Tagging all 6,623 would have cost about 11× more for
    no benefit, because most were senior or non-India roles.
 2. **A content-hash cache.** Results are keyed on
-   `title + company + location + description + prompt version`, so a daily run
+   `title + company + location + description + prompt version`, so a run
    only pays for posts it has not seen. On the second run, **571 of 572 posts
    came from cache and the run cost $0.00** — 310s down to 21.5s.
 
@@ -311,10 +311,10 @@ across 20 query sets covering filters, sorting, paging and all three facet maps.
 
 ---
 
-## 9. How the daily refresh works
+## 9. How the refresh works
 
-`.github/workflows/daily.yml` runs at **01:30 UTC = 07:00 IST**, and on manual
-trigger:
+`.github/workflows/refresh.yml` runs **every 12 hours** (`30 1,13 * * *` —
+07:00 and 19:00 IST) and on manual trigger:
 
 1. install → run 104 tests → run the pipeline
 2. commit the refreshed data files
@@ -328,6 +328,16 @@ trigger:
   the job is *then* marked failed so the failure is still visible.
 - A post that has disappeared from its source feed is simply absent from the
   next run's output. That is how stale postings drop off.
+
+**Why twice a day rather than hourly — the constraint that set the schedule.**
+Each run makes 42 Adzuna calls (7 queries × 6 pages). Adzuna's published terms
+no longer state free-tier numbers (they are shown in the account); the commonly
+cited figure is ~2,500 calls a month. That pays for ~59 full fetches a month,
+so two a day (~2,520) is the ceiling. This matters more than it looks: Adzuna
+supplies ~98% of published posts, and `fetch.py` logs a warning and continues
+when a call fails — so exceeding the quota would not crash the run, it would
+quietly publish a near-empty page. Going more frequent needs either a paid plan
+or a thinner fetch that accumulates across runs instead of replacing.
 
 Secrets are only ever read from environment variables — GitHub Actions secrets
 in CI, a gitignored `.env` locally. No key is in the repository.
@@ -367,7 +377,7 @@ mine rather than the model's.
 3. **The job detail panel** — full description and the apply link.
 4. **Google Sign-In** — the login screen, and the signed-in header.
 5. **`/docs`** — the interactive API documentation on Render.
-6. **GitHub Actions** — a green "daily refresh" run.
+6. **GitHub Actions** — a green "refresh job data" run.
 7. **Terminal: `python -m pytest -q`** — 104 passed.
 8. **Terminal: `python scripts/cost_report.py ...`** — the cost per 1,000 posts.
 9. **Terminal: `python scripts/score_eval.py data/eval_sample.csv`** — the

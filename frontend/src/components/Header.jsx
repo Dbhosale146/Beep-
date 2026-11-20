@@ -21,7 +21,7 @@ export default function Header({ total, refreshed, sources, action }) {
         <div className="hero-top">
           <span className="hero-eyebrow rise" style={{ "--d": "0ms" }}>
             <span className="live-dot" aria-hidden="true" />
-            Refreshed daily from public job-board APIs
+            Refreshed twice a day from public job-board APIs
           </span>
           {action}
         </div>
