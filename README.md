@@ -1,422 +1,602 @@
-# Beep — fresher jobs & internships in India
+# Beep — Fresher Jobs Radar
 
-Collects fresher and internship posts in India from official public job-board
-APIs, de-duplicates them, tags each one by role and city with an LLM, serves
-them over an HTTP search API, and shows them on a React job board that
-refreshes itself twice a day.
+**500+ real fresher jobs and internships in India, de-duplicated, AI-tagged by role and city, refreshed twice a day.**
 
-**Current numbers** (pipeline run of 2026-11-16, API measured 2026-11-17):
+[🌐 Live demo](#) <!-- TODO: fill — GitHub Pages URL --> ·
+[🎥 Loom walkthrough](#) <!-- TODO: fill — Loom link --> ·
+[📄 Data & prompts sheet](#) <!-- TODO: fill — sheet link --> ·
+[🔌 Live API](https://beep-6fn4.onrender.com/docs) ·
+[📦 Repo](https://github.com/Dbhosale146/Beep-)
+
+---
+
+## 📌 TL;DR
 
 | | |
 |---|---|
-| Raw posts fetched | 6,623 across 4 sources |
-| India posts after normalisation | 2,520 |
-| Fresher/internship posts after filtering | 1,075 |
-| Duplicates removed | 503 (layer 1: 395, layer 2: 58, layer 3: 50) |
-| **Published posts** | **565** |
-| Posts tagged `Untagged` | 0 |
-| Model | `gemini-3.5-flash-lite` |
-| **Cost per 1,000 posts** | **$0.158** |
-| Full pipeline run / cached re-run | 310s / 21.5s |
-| API response, warm | 13–30 ms |
-| Tests | 73 (48 pipeline, 25 API) |
+| **Posts published** | **562** (from 6,551 raw, run of 2026-11-20) |
+| **Duplicates removed** | **501** across three layers |
+| **Tag accuracy** (50 hand-checked) | <!-- TODO: fill — run scripts/score_eval.py --> |
+| **Cost per 1,000 posts** | **$0.1588** |
 
-Build notes, including everything that broke: [docs/build_log.md](docs/build_log.md).
+Supporting numbers: 18 role categories, 38 distinct cities in the current
+output, 0 posts left untagged, 104 tests, 0 scrapers.
 
 ---
 
-## Layout
+## 💡 Problem & approach
 
-Two halves, two folders, nothing shared between them except the HTTP contract.
-
-```
-backend/      Python: the refresh pipeline and the API that serves its output
-frontend/     React + Vite: the job board
-docs/         build log
-```
-
-```
-backend/
-  api/          main.py          the HTTP API
-  config/       companies.yaml · taxonomy.yaml · fresher.yaml · settings.yaml
-  pipeline/     config · http · run · normalise · fresher · dedup · tag · export
-                sources/  greenhouse · lever · ashby · adzuna
-  prompts/      tag_v1.txt · tag_v2.txt   (versioned, never inline strings)
-  scripts/      verify_companies · sample_for_eval · score_eval · cost_report
-  tests/        73 no-network tests
-  data/         jobs.json · run_meta.json · tag_cache.json · usage_log.jsonl
-
-frontend/
-  src/
-    App.jsx         composition root: state in, components out
-    components/     Header · SearchBar · FilterBar · JobCard · JobPanel
-                    Pagination · SkeletonGrid · EmptyState · ProgressBar
-    hooks/          useJobs · useUrlState · useSaved · useCountUp
-    lib/            api.js (every fetch) · format.js (pure display helpers)
-    styles/         tokens · base · components · animations
-  vite.config.js    dev proxy to the API
-```
+- **Fresher job hunting in India is a de-duplication problem, not a search
+  problem.** The same role is posted on an ATS board, aggregated by Adzuna, and
+  reposted days later. 501 of 1,068 candidate posts in the last run were
+  duplicates — 47%.
+- **Official APIs only, no scraping.** Every source is a documented public JSON
+  endpoint. Nothing parses HTML, nothing ignores a `robots.txt`, nothing needs a
+  disguised user-agent. That decision cost coverage and bought a system that
+  will not break or get blocked next week.
+- **Cheap filters run before expensive ones.** Keyword rules cut 2,502 posts to
+  1,068, and de-duplication cuts that to 567, *before* the LLM sees anything.
+  The model is the most expensive stage, so it runs on the smallest possible set.
+- **The model is never trusted to invent a value.** The taxonomy goes into the
+  request as a JSON schema `enum`, so an off-taxonomy answer is structurally
+  impossible — and the response is validated in Python regardless. One retry,
+  then the post is published as `Untagged`. It never guesses.
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
+```mermaid
+flowchart TD
+    subgraph Sources["Sources — official APIs only"]
+        GH[Greenhouse<br/>18 company boards]
+        LV[Lever<br/>6 company boards]
+        AB[Ashby<br/>1 company board]
+        AZ[Adzuna India<br/>7 queries x 6 pages]
+    end
+
+    SCHED([GitHub Actions cron<br/>07:00 and 19:00 IST]) -.triggers.-> COLLECT
+
+    GH --> COLLECT
+    LV --> COLLECT
+    AB --> COLLECT
+    AZ --> COLLECT
+
+    COLLECT[Collect<br/>run_fetch.py<br/>6,551 raw] --> NORM
+    NORM[Normalise + India filter<br/>normalise.py<br/>2,502 kept] --> FRESH
+    FRESH[Fresher keyword filter<br/>fresher.py<br/>1,068 kept] --> DEDUP
+    DEDUP[De-duplicate, 3 layers<br/>dedup.py<br/>567 unique, -501] --> TAG
+    TAG[LLM tagger<br/>Gemini 3.5 Flash Lite<br/>batches of 10 + cache] --> STORE
+    STORE[(jobs.json<br/>run_meta.json)] --> API
+    STORE --> BUNDLE
+
+    API[FastAPI search API<br/>Render] --> UI
+    BUNDLE[Dataset bundled<br/>at build time] --> UI
+    UI[React UI<br/>GitHub Pages]
+
+    TAG <-.content-hash cache.-> CACHE[(tag_cache.json)]
 ```
-                 ┌──────────────────────────────────────────┐
-  config/*.yaml  │ companies · taxonomy · fresher · settings │
-                 └───────────────────┬──────────────────────┘
-                                     │ read by every stage
- ┌───────────┐   ┌────────────┐   ┌──┴───────┐   ┌───────┐   ┌─────┐   ┌────────┐
- │  fetch    │──▶│ normalise  │──▶│ fresher  │──▶│ dedup │──▶│ tag │──▶│ export │
- └───────────┘   └────────────┘   └──────────┘   └───────┘   └─────┘   └────────┘
-  greenhouse      one schema        keyword       3 layers    Gemini    jobs.json
-  lever           India filter      rules         counted     + cache   run_meta.json
-  ashby           city aliases      0-1 years                 + usage        │
-  adzuna                                                        log          │
-                                                                             ▼
-                                                            ┌────────────────────┐
-                                                            │  backend/api       │
-                                                            │  FastAPI, in-memory│
-                                                            │  search + facets   │
-                                                            └─────────┬──────────┘
-                                                                      │ JSON over HTTP
-                                                                      ▼
-                                                            ┌────────────────────┐
-                                                            │  frontend (React)  │
-                                                            └────────────────────┘
-```
 
-The pipeline runs once a day and writes files. The API reads those files and
-answers search queries. The two never run at the same time and share nothing
-but the file on disk, which is why a pipeline failure cannot take the site
-down — the API keeps serving yesterday's `jobs.json`.
+**Why the UI has two data paths.** GitHub Pages cannot run Python. If the page
+could only talk to the API, the published link — the thing actually being
+reviewed — would be dead whenever the free API is asleep or undeployed. So the
+build bundles the dataset and the page searches it in-browser; setting one
+repository variable switches the same page to the live API instead. The cost is
+that the search contract exists twice, in Python and JavaScript, which is only
+safe because it is small, frozen, and diffed across 20 query sets.
+`backend/api/main.py` is the source of truth.
 
-### fetch — `backend/pipeline/sources/`
-One file per source, each exposing exactly `fetch() -> list[dict]`. Adding a
-source is one new file plus one line in `pipeline/sources/__init__.py`. Every
-source goes through the single `pipeline/http.py` helper, so timeout, retry and
-backoff behaviour is identical everywhere and lives in one place.
+---
 
-| source | endpoint | auth | notes |
+## 🔄 One post, end to end
+
+Following a single Adzuna listing through the pipeline:
+
+1. **Collected.** `GET https://api.adzuna.com/v1/api/jobs/in/search/1?what=intern&max_days_old=30&results_per_page=50`
+   returns a listing titled `Social Media Intern`, company `Hypersonix`,
+   location `India`.
+2. **Normalised** into the one internal schema: `id, source, source_id, title,
+   company, raw_location, city_guess, department, employment_type, description,
+   url, posted_at, fetched_at`. `city_guess` is a cheap alias lookup — it decides
+   whether the post is in India at all, and later gives the model a candidate to
+   confirm rather than a blank to guess at.
+3. **Fresher check.** The title matches the word-bounded pattern `intern`, so it
+   is kept with reason `title_positive:intern`. Word-bounded matters — see
+   [What broke](#️-what-broke--how-i-fixed-it).
+4. **De-duplicated.** Its canonical URL has not been seen; its
+   company + title + city hash is new; no title within Hypersonix scores ≥ 90
+   against it. Kept.
+5. **Tag cache checked.** SHA-256 of
+   `title + company + location + description + prompt version` — a miss, so it
+   goes to the model.
+6. **Tagged.** Sent in a batch of 10. The schema forces `role` to one of 18
+   values and `city` to one of 60. Returns `Marketing & Growth`, `Pan India`,
+   `is_fresher: true`. Python re-validates, then the result is cached under that
+   hash.
+7. **Published** to `jobs.json`, committed by the workflow, served by the API and
+   bundled into the frontend build.
+
+On the next run, step 5 hits the cache and step 6 costs nothing. In the
+2026-11-20 run, **567 of 567 posts were cache hits — the whole run cost $0.00.**
+
+---
+
+## 🌐 Data sources & compliance
+
+| Source | Method | Raw collected | Published | Terms / compliance note |
+|---|---|---|---|---|
+| **Greenhouse** | Public JSON API — `boards-api.greenhouse.io/v1/boards/{board}/jobs` | 4,601 | 3 | Documented public endpoint, no key, no auth. Boards listed in `config/companies.yaml` |
+| **Lever** | Public JSON API — `api.lever.co/v0/postings/{company}?mode=json` | 321 | 5 | Documented public endpoint, no key |
+| **Ashby** | Public JSON API — `api.ashbyhq.com/posting-api/job-board/{board}` | 7 | 0 | Documented public endpoint, no key |
+| **Adzuna** | Official REST API with a registered key — `api.adzuna.com/v1/api/jobs/in/search/{page}` | 1,622 | 554 | Free tier, key from `developer.adzuna.com`. Their ToS permits personal job search and personal/academic research. ~2,500 calls a month, which is what sets the refresh schedule |
+
+**No HTML scraping anywhere.** No `robots.txt` is touched, because no crawler
+exists. Every request goes to a JSON endpoint the provider publishes for
+programmatic use.
+
+**The honest weakness.** Greenhouse contributed 4,601 raw postings and 3
+survivors — those boards are mostly US companies with few India-based fresher
+roles. 554 of 562 published posts come from Adzuna. That is a research gap,
+finding Indian companies that use these ATS boards, not a code gap. It is the
+first thing I would fix.
+
+---
+
+## 🧹 De-duplication
+
+Three layers, cheapest first, each catching what the previous one cannot.
+
+| Layer | Method | Catches | Removed |
 |---|---|---|---|
-| Greenhouse | `boards-api.greenhouse.io/v1/boards/{token}/jobs?content=true` | none | 18 verified boards |
-| Lever | `api.lever.co/v0/postings/{company}?mode=json` | none | returns a JSON **array**; `createdAt` is epoch **ms** |
-| Ashby | `api.ashbyhq.com/posting-api/job-board/{name}` | none | filter on `isListed` |
-| Adzuna | `api.adzuna.com/v1/api/jobs/in/search/{page}` | app id + key | the volume source; `description` is **truncated** |
+| 1 — exact | `(source, source_id)` seen before, **or** canonical URL seen before (query string stripped, trailing slash removed, lowercased) | The same post returned by two of our seven Adzuna queries | **352** |
+| 2 — hash | Normalised `company + title + city_guess` | The same role posted on an ATS board *and* picked up by the aggregator, with different ids and URLs | **103** |
+| 3 — fuzzy | `rapidfuzz`, within one company only: `token_sort_ratio ≥ 90` **or** `token_set_ratio ≥ 95` | `Software Engineer Intern` vs `Intern - Software Engineer`; `Data Analyst` vs `Data Analyst (Fresher)` | **46** |
+| | | **Total** | **501 of 1,068 — 47%** |
 
-A source that fails is logged and skipped. The run continues.
+**Why fuzzy matching is scoped to one company.** Comparing every title against
+every other is O(n²) and, worse, wrong: `Software Engineer Intern` at two
+different companies is two real jobs. Scoping to a single employer makes it both
+cheap and correct.
 
-### normalise — `backend/pipeline/normalise.py`
-Everything becomes one schema: `id, source, source_id, title, company,
-raw_location, city_guess, department, employment_type, description, url,
-posted_at, fetched_at`. The India check trusts an explicit country field when
-the source gives one (Lever `"IN"`, Ashby `"India"`, Adzuna `area[0]`) and only
-falls back to string matching for Greenhouse, which gives nothing.
-`city_guess` resolves aliases from `config/taxonomy.yaml` so the LLM confirms
-a candidate rather than guessing from scratch.
-
-### fresher filter — `backend/pipeline/fresher.py`
-Keyword rules first, so we never pay to tag thousands of senior roles. Title
-positives, title negatives, an explicit `employment_type` of `Intern`, then a
-years-of-experience scan of the description keeping anything asking for ≤1
-year. Every pattern is matched with `\b` word boundaries — without them,
-`intern` matches "Senior **Intern**al Auditor". The LLM also returns
-`is_fresher`, and posts it rejects are dropped afterwards.
-
-### dedup — `backend/pipeline/dedup.py`
-Three layers, each counted separately in `run_meta.json`:
-
-1. **exact** — same `(source, source_id)`, or same URL ignoring query string.
-   Catches one Adzuna job returned by several of our search queries.
-2. **hash** — normalised company + title + city. Catches the same job on a
-   company's own board *and* in the Adzuna index, where ids and URLs differ.
-3. **fuzzy** — rapidfuzz within one company. `token_sort_ratio ≥ 90` for
-   reordering and typos, plus `token_set_ratio ≥ 95` for "SDE Intern" vs
-   "SDE Intern (2027 Batch)", guarded so a bare "Intern" cannot swallow a
-   company's whole list.
-
-### tag — `backend/pipeline/tag.py`
-Google Gemini via the Interactions API, ~10 posts per call, `temperature: 0`
-and `thinking_level: minimal`. The role and city taxonomies go into the JSON
-schema as `enum`, so constrained decoding makes an off-taxonomy answer
-*impossible* rather than merely unlikely. Every response is still validated
-against `config/taxonomy.yaml`; one retry on failure, then the post is marked
-`Untagged`. **Nothing is ever guessed.**
-
-Results are cached in `data/tag_cache.json` by a hash of
-title + company + location + description + prompt version, so a run only
-pays for posts it has not seen. In practice: 571 of 572 posts came from cache
-on the second run.
-
-Prompts live in `prompts/` as versioned plain text (`tag_v1.txt`, `tag_v2.txt`).
-Bumping `PROMPT_VERSION` invalidates the cache on purpose — answers from two
-different prompts must never be mixed.
-
-### export — `backend/pipeline/export.py`
-`data/jobs.json` (an explicit field allow-list, so no internal field can leak)
-and `data/run_meta.json` (run time, per-source counts, dedup counts, tagging
-counts, token totals, role/city facets).
-
-### API — `backend/api/main.py`
-FastAPI. One file, ~200 lines including comments.
-
-| endpoint | returns |
-|---|---|
-| `GET /api/jobs` | one page of results + facet counts + totals |
-| `GET /api/jobs/{id}` | one job with its full description |
-| `GET /api/meta` | the pipeline's `run_meta.json` |
-| `GET /api/health` | status and loaded job count, for a host's health check |
-| `GET /docs` | interactive API docs, generated by FastAPI |
-
-`/api/jobs` takes `q`, `role`, `city`, `source`, `posted_within_days`, `sort`
-(`recent` / `oldest` / `company` / `title`), `page` and `page_size`.
-
-Three decisions worth explaining:
-
-- **No database.** 565 posts is small enough that filtering a list of dicts
-  takes about a millisecond; a warm request is 13–30 ms end to end. A database
-  would add a service to run, a schema to migrate and a connection pool, and
-  would not make one request faster at this size. If the dataset reached six
-  figures, `_load()` is the single function to replace, and the routes would
-  not change.
-- **The file is reloaded when its mtime changes**, so a pipeline run appears
-  without restarting the server, and a broken `run_meta.json` is caught and
-  ignored rather than taking the API down.
-- **Facets ignore their own dimension.** Selecting Bengaluru leaves the city
-  menu showing every city, so the counts answer "how many would I get if I
-  picked this?" rather than collapsing to one option. The role menu *does*
-  respect the city filter. There is a test for exactly this.
-
-Internal fields are prefixed `_` and stripped before any response, and the list
-endpoint sends a 300-character snippet instead of the full 1,200, which is
-about a third of the payload for a page of results.
-
-### authentication — `backend/api/auth.py`, `frontend/src/hooks/useAuth.js`
-Google Sign-In. The app has **no password field anywhere**, deliberately:
-asking for someone's Gmail password in our own form is phishing, Google blocks
-it, and it would hand us a credential we have no business holding. Google shows
-its own sign-in screen and returns an ID token — a JWT it signed.
-
-The API verifies that token with `google-auth`, which checks:
-
-- the RS256 signature against Google's published keys (fetched and cached, so a
-  rotated key is picked up automatically)
-- `aud` equals our own client id — without this, a token minted for *any* other
-  Google app would be accepted here
-- `iss` is accounts.google.com, and `exp` has not passed
-- `email_verified` is true, since a Google account can carry an unverified address
-
-None of that is forgeable in the browser, because the browser does not hold
-Google's signing key. That is what makes it real authentication rather than
-decoration.
-
-| env var | effect |
-|---|---|
-| `GOOGLE_CLIENT_ID` | the client id tokens must be addressed to (required) |
-| `REQUIRE_AUTH=true` | `/api/jobs`, `/api/jobs/{id}` and `/api/meta` refuse anonymous callers |
-| `ALLOWED_EMAILS` | optional allowlist; without it any Google account may sign in |
-
-`/api/health` and `/api/auth/config` stay open either way — a host's health
-probe has no token, and the login screen has to load before anyone has one.
-
-**The honest limitation.** This protects the API. It cannot protect the
-statically published dataset: on GitHub Pages `data/jobs.json` is a public file,
-so there the login wall gates the *interface*, not the data. What it does do
-correctly is fetch nothing at all until sign-in — with a client id configured,
-a signed-out visitor triggers zero data requests. To make the gate load-bearing
-over the data, deploy the API with `REQUIRE_AUTH=true` and point
-`VITE_API_BASE` at it.
-
-Client-side, `useAuth` decodes the token's payload only to show a name and
-avatar, and the code says so: a JWT payload is just base64 and anyone can write
-one. Nothing is trusted on the strength of it — the token still has to satisfy
-the server. Tokens live about an hour; the hook signs the user out when one
-expires rather than leaving a signed-in header above failing requests.
-
-### frontend — `frontend/`
-React 19 + Vite. No router, no state library, no UI kit, no animation library.
-
-Split so each file has one job: `App.jsx` is a readable outline of how the page
-behaves, everything that renders is a component, everything that fetches or
-persists is a hook, and all the motion is in one stylesheet.
-
-**Behaviour**
-
-- **The URL is the state.** Filters live in the query string, so a search can
-  be bookmarked, shared and reloaded and the back button works. `replaceState`,
-  not `pushState`, or typing would add a history entry per keystroke.
-- **Search is debounced 300 ms** and every request is abortable, because
-  responses can arrive out of order — a slow request for "dev" must not land
-  after the fast one for "devops" and overwrite the right results.
-- **Removable filter chips** show what is applied; the selects carry live facet
-  counts from the API.
-- **Keyboard**: `/` focuses search, `Escape` clears it or closes the drawer.
-- **Detail drawer** fetched per job, with the apply link out to the original
-  posting and the page behind it scroll-locked.
-- **Saved jobs** in `localStorage`, storing the whole job so the Saved tab
-  needs no network and still works if the API is down. Every read and write is
-  wrapped in try/catch, because private windows throw.
-- Server-side pagination with a windowed page list (first, last, and the
-  current page's neighbours — rendering all 24 numbers is noise).
-
-**Motion** — all CSS keyframes in `styles/animations.css`, no JS animation
-library. The one exception is the hero's count-up, which needs
-`requestAnimationFrame` to run on the browser's paint clock.
-
-| what | why |
-|---|---|
-| Cards stagger in, 35 ms apart | the grid assembles instead of appearing; delay capped at 560 ms so the last card does not lag |
-| Card lift + company-coloured edge on hover | makes the grid feel responsive to the pointer |
-| Drawer slides in, backdrop fades | reads as "same page, more detail" rather than a navigation |
-| Skeleton shimmer | a gradient swept by `background-position`, cheaper than animating a pseudo-element |
-| Indeterminate top bar | we do not know how long a request takes, and a fake percentage would be a lie |
-| Count-up on the job total | `requestAnimationFrame` + easeOutCubic, with tabular figures so the width does not jitter |
-| Star pops when saved | confirms the click without a toast |
-| Hero blobs drift, live dot pings | a little life on an otherwise static header |
-
-Every animation is disabled under `prefers-reduced-motion` from one block.
-Hover-only affordances get a `@media (hover: none)` fallback so touch is not
-left with hidden controls. Colours are CSS custom properties defined once in
-`tokens.css`; dark mode redefines the same names, so no component knows which
-theme is active.
+**Why two ratios.** `token_sort_ratio` catches reordering and typos.
+`token_set_ratio` catches one title being the other plus a qualifier — it scores
+`Data Analyst` / `Data Analyst (Fresher)` as a match where `token_sort_ratio`
+does not. Both thresholds are deliberately high: a false merge silently deletes
+a real job, which is worse than showing a near-duplicate.
 
 ---
 
-## Setup
+## 🤖 LLM tagging
 
-```bash
-# backend
-cd backend
-python -m pip install -r requirements.txt
-cp .env.example .env          # then fill in the three keys
+| | |
+|---|---|
+| Model | `gemini-3.5-flash-lite` |
+| Batch size | 10 posts per call |
+| Input per post | title, company, raw location, first **600 characters** of the description |
+| Structured output | JSON schema with `enum` constraints on `role` and `city` |
+| Validation | Python re-validates every field after the schema |
+| On invalid output | **one** retry, then publish as `Untagged` — never a guess |
+| Caching | SHA-256 of `title + company + location + description + prompt version` |
+| Untagged in the last run | **0** |
 
-# frontend
-cd ../frontend
-npm install
+**Role taxonomy — 18 values.** Software Engineering · Frontend Engineering ·
+Backend Engineering · Mobile Engineering · Data Science & Analytics · Data
+Engineering · Machine Learning & AI · DevOps & Infrastructure · QA & Testing ·
+Security Engineering · Product Management · Design (UI/UX) · Sales & Business
+Development · Marketing & Growth · Operations & Support · Finance & Accounting ·
+Human Resources · Other
+
+**City normalisation.** 57 canonical Indian cities with alias lists
+(`Bangalore → Bengaluru`, `Gurgaon → Gurugram`, `Powai → Mumbai`), plus three
+special values: `Remote`, `Pan India` for country- or state-only locations such
+as a bare `"India"`, and `Multiple`. 38 distinct cities appear in the current
+output.
+
+**Why the enum matters more than the prompt.** Asking a model nicely for one of
+18 values gets you 18 values *most* of the time. Putting the list in the response
+schema makes anything else structurally impossible to emit. The Python validator
+still runs — because a schema protects against the model, not against a future
+SDK change or a bad config.
+
+**Prompt versioning.** Prompts are plain text files in `backend/prompts/`, not
+inline strings, and the version is part of the cache key — so editing a prompt
+invalidates exactly the cached tags it should and nothing else. `tag_v2` exists
+because `tag_v1` had no rule for country-only locations.
+
+<details>
+<summary><b>The exact tagging prompt (backend/prompts/tag_v2.txt)</b></summary>
+
+```text
+You classify Indian fresher job and internship posts. You will be given a
+numbered list of posts. Return one object per post, in the same order, using
+the index number you were given.
+
+For each post decide three things.
+
+1. role -- the single best match from this list and nothing else:
+{ROLES}
+
+2. city -- the work location, from this list and nothing else:
+{CITIES}
+   Rules for city, in priority order:
+   - If the post names one city, answer that city, using the canonical name
+     exactly as written above. "Bangalore" is "Bengaluru". "Gurgaon" is
+     "Gurugram". "Trichy" is "Tiruchirappalli".
+   - A neighbourhood or suburb counts as its city: "Padmanabhnagar, Bangalore"
+     is "Bengaluru", "Powai" is "Mumbai".
+   - If only a state or the country is given with no city -- for example
+     "India", "Karnataka, India", "West Bengal" -- answer "Pan India".
+   - If the post is fully remote or work-from-home, answer "Remote".
+   - If the post names two or more different cities, answer "Multiple".
+   - If a single city is named but is genuinely not in the list above, answer
+     "Multiple" rather than inventing a name.
+
+3. is_fresher -- true only if this post is genuinely open to someone with no
+   more than one year of experience, or is an internship, apprenticeship,
+   trainee or new-graduate role. Set it to false for anything asking for two
+   or more years, and for senior, lead, staff, principal or manager roles,
+   even if the title contains the word "intern" as part of another word such
+   as "internal".
+
+Judge only from the text given. Do not use outside knowledge about the
+company. Do not guess at a value you cannot support from the post.
+
+Posts:
+{POSTS}
 ```
 
-`backend/.env` needs `ADZUNA_APP_ID`, `ADZUNA_APP_KEY` (free tier at
-developer.adzuna.com) and `GEMINI_API_KEY` (aistudio.google.com/api-keys).
-Secrets are only ever read from env vars; in CI they are GitHub Actions
-secrets. `.env` is gitignored.
+`{ROLES}` and `{CITIES}` are injected from `config/taxonomy.yaml` — the same
+file that builds the response schema, so the prompt and the schema cannot drift
+apart.
 
-The frontend needs no configuration locally — `vite.config.js` proxies `/api`
-to `127.0.0.1:8000`, so the browser sees one origin and CORS never comes into
-it. `frontend/.env.example` covers the production case.
+</details>
 
-## Run
+---
 
-Two terminals. The pipeline has to have produced `backend/data/jobs.json` at
-least once before the API has anything to serve.
+## 📊 Evaluation
+
+50 posts drawn with `scripts/sample_for_eval.py`, hand-labelled, scored with
+`scripts/score_eval.py`.
+
+- **Sampling method:** <!-- TODO: fill — random, or stratified by source -->
+- **Role accuracy:** <!-- TODO: fill — x/50 = % -->
+- **City accuracy:** <!-- TODO: fill — x/50 = % -->
+- **Both correct:** <!-- TODO: fill — x/50 = % -->
+- **`is_fresher` accuracy:** <!-- TODO: fill — x/50 = % -->
+- **Labelled sheet:** <!-- TODO: fill — link -->
+
+**Error types observed so far:**
+
+| Error | Example | Status |
+|---|---|---|
+| A suburb is not resolved to its city | A posting at *"Warje, Pune"* tagged `Multiple`, although the prompt says a suburb counts as its city | Known, unfixed. The fix means bumping the prompt version, which invalidates the entire tag cache |
+| <!-- TODO: fill from the labelled sheet --> | | |
+
+Reproduce:
 
 ```bash
-# terminal 1 — the API
 cd backend
-uvicorn api.main:app --reload --port 8000
-
-# terminal 2 — the site
-cd frontend
-npm run dev                 # http://localhost:5173
+python scripts/score_eval.py data/eval_sample.csv
 ```
 
-Everything else:
+---
+
+## 💰 Cost per 1,000 posts
+
+Measured, not estimated. Every LLM call writes its token counts to
+`data/usage_log.jsonl`, and the report is computed from that log with prices
+passed in as arguments — so the number always reflects prices checked today,
+never a constant that has silently gone stale.
 
 ```bash
-# backend, from backend/
-python -m pipeline.run                      # full run: fetch -> export
-python -m pipeline.run --no-llm             # everything except tagging (free)
-python -m pipeline.run --limit 50           # tag only 50 posts, for a cheap test
-python -m pipeline.run --raw data/raw_jobs.json   # reuse last fetch, skip the network
-python scripts/verify_companies.py          # are all board tokens still alive?
-python -m pytest -q                         # 73 tests
-
-# frontend, from frontend/
-npm run build                               # -> frontend/dist
-npm run preview                             # serve the production build
-
-# reporting, from backend/
-python scripts/sample_for_eval.py                                  # 50-post CSV to label
-python scripts/score_eval.py data/eval_sample.csv                  # accuracy
+cd backend
 python scripts/cost_report.py --input-price 0.30 --output-price 2.50
 ```
 
-The API picks up a new `jobs.json` on its own — no restart needed.
-
-## Accuracy and cost reporting
-
-`scripts/sample_for_eval.py` writes 50 posts stratified by source to
-`data/eval_sample.csv`, with the model's answers in `model_*` columns and empty
-`true_*` columns beside them. Fill those in, then `score_eval.py` prints role,
-city and `is_fresher` accuracy plus the most common confusions.
-
-`scripts/cost_report.py` takes prices as arguments rather than reading them
-from config, so the number quoted is always computed from prices checked at the
-time. It bills **output + thinking** tokens, because Gemini reports
-`total_thought_tokens` separately and thinking is charged at the output rate.
-
-## Deployment
-
-The site and the API deploy independently, and **the site does not need the
-API to work**.
-
-`frontend/src/lib/api.js` picks its data source at build time:
-
-| `VITE_API_BASE` | behaviour |
+| Step | Value |
 |---|---|
-| not set | the page fetches the dataset bundled into the build and searches it in the browser (`lib/search.js`) |
-| set | the page calls that HTTP API instead |
+| Model | `gemini-3.5-flash-lite` |
+| Prices used | **$0.30** per 1M input tokens · **$2.50** per 1M output tokens |
+| Posts tagged, cumulative | 1,362 over 140 calls, 0 retries |
+| Input tokens | 271,134 → **199.1 per post** |
+| Output tokens | 53,988 → **39.6 per post** |
+| Input cost | 271,134 ÷ 1,000,000 × $0.30 = **$0.0813** |
+| Output cost | 53,988 ÷ 1,000,000 × $2.50 = **$0.1350** |
+| Total | $0.0813 + $0.1350 = **$0.2163** for 1,362 posts |
+| **Cost per 1,000 posts** | $0.2163 ÷ 1,362 × 1,000 = **$0.1588** |
+| In ₹ | <!-- TODO: fill — multiply by today's USD/INR rate --> |
+| Hosting and everything else | **$0** — Render free tier, GitHub Pages, GitHub Actions (free on public repos) |
 
-Both paths return the identical response shape, so no hook or component knows
-which one answered.
+**Thinking tokens bill at the output rate**, so the report counts them as output
+rather than reporting a cheaper, wrong number. The current config sets
+`thinking_level: minimal` and measured thinking tokens are 0.
 
-**Why bother with two.** GitHub Pages cannot run Python. Without the local
-path, the published link — the one thing actually being graded — would be dead
-whenever the API is undeployed or asleep on a free tier. With it, Pages alone
-is a complete, instant, self-refreshing site, and the API becomes an upgrade
-switched on with one repository variable.
+**The cache changes the real-world number.** A refresh only pays for postings it
+has not seen before. The 2026-11-20 run tagged 567 posts — **567 from cache, 0
+LLM calls, $0.00** — in 186 seconds.
 
-The cost is real and worth stating plainly: the search exists twice, in Python
-and in JavaScript. That is only safe because the contract is small and frozen,
-and because the two are diffed against each other over 20 query sets covering
-filters, sorting, paging and all three facet maps. If they ever disagree,
-`backend/api/main.py` is the source of truth.
+---
 
-**Publishing the site** (no server needed):
+## 🛠️ What broke & how I fixed it
 
-1. Push to GitHub.
-2. Settings → Pages → Source: **GitHub Actions**.
-3. Settings → Secrets and variables → Actions → add secrets `ADZUNA_APP_ID`,
-   `ADZUNA_APP_KEY`, `GEMINI_API_KEY`.
-4. Actions → *refresh job data* → **Run workflow**.
+The ones worth your time. The full log is in
+[`docs/build_log.md`](docs/build_log.md).
 
-**Adding the live API** (optional): deploy `backend/` anywhere that runs
-Python, starting `uvicorn api.main:app --host 0.0.0.0 --port $PORT` from
-`backend/` with health check `/api/health`. Set `CORS_ORIGINS` to the Pages origin, then add a
-repository **variable** `API_BASE_URL` pointing at it including `/api`. The next
-build switches over. On a free tier the service sleeps when idle, which is why
-the static path is the default rather than the fallback.
+| Problem | Root cause | Fix | Result |
+|---|---|---|---|
+| "Senior **Intern**al Auditor" classified as an internship | `intern` was matched as a substring, not a word | Word-bounded regex for every keyword, plus a regression test named after the bug | Caught only because I printed the matched titles instead of trusting the count |
+| 170 posts tagged `Multiple` for city | **My taxonomy, not the model.** It was missing most of India — Surat, Rajkot, Lucknow, Patna, Ranchi | Added 33 tier-2 cities | `Multiple` fell to 39; city coverage went 23 → 40 |
+| Adzuna returns country-only locations like `"India"` | `Multiple` was the wrong bucket — that is one unknown city, not several | New `Pan India` value plus a prompt rule, giving `tag_v2` | Correct bucket, and a versioned prompt change that invalidated only the affected cache entries |
+| The API served data to anonymous callers while auth was "on" | `api/auth.py` read `os.environ` directly, but nothing loaded `.env`. The pipeline got it free via `require_env()`; the API did not | `load_env()` at API import | `/api/auth/config` went from `{"configured":false}` to `{"configured":true,"required":true}` — it had been failing in the dangerous direction |
+| That fix broke 25 tests | The tests depended on an untracked `.env`: green in CI, red locally | `tests/conftest.py` clears the auth env vars for every test | Tests no longer depend on a file that is not in the repo |
+| The login wall leaked the whole dataset before sign-in | `App.jsx` fetched run metadata on mount for a job count, and in static mode that loader also pulls the job data | Gated the fetch on `unlocked` and dropped the count | Pre-login network fetches: none |
+| Python and JS search disagreed on 8 of 20 query sets | Python's `sources` facet ignored the active role and city filters | Fixed the facet — **but the suite was green and the running dev server was serving stale code** | 20/20 agree. Lesson: a green test suite says nothing about what a long-running dev server is serving |
+| Render build failed: "Could not open requirements file" | Root Directory was not set. `requirements.txt` is at `backend/`, and `from pipeline.config import …` only resolves from inside it | Set Root Directory to `backend` | 16 of 16 deployment checks pass |
+| Tried a 2-hourly refresh; the dataset collapsed 562 → 148 | A new merge step passed all 7 of its unit tests, then fed dedup 1,638 posts where it had only ever seen one fetch's worth. `layer1_exact` stripped 465 | Deleted the merge; set the schedule to the quota ceiling instead | **A passing unit test for a new stage says nothing about what that stage does to the stages after it** |
 
-## Refresh schedule
+---
 
-`.github/workflows/refresh.yml` runs every 12 hours (`30 1,13 * * *` — 07:00
-and 19:00 IST) and on manual trigger: install, test, run pipeline, commit the
-data files, build the frontend, deploy to Pages.
+## 🧰 Tech stack
 
-**Why twice a day and not more often.** Each run makes 42 Adzuna calls
-(7 queries × 6 pages) and Adzuna's free tier allows roughly 2,500 calls a
-month. Two runs a day is 84 a day, ~2,520 a month — the most a full fetch can
-sustain. Adzuna supplies ~98% of published posts, and `fetch.py` logs a warning
-and continues when a call fails, so a throttled run would publish a nearly
-empty page instead of failing loudly. Running more often needs either a paid
-Adzuna plan or a thinner fetch that accumulates across runs.
+| Layer | Choice | Why |
+|---|---|---|
+| Language | Python 3.12 | The pipeline is I/O and text work |
+| Collection | `requests` 2.34.2 | Four JSON APIs. No scraping framework needed, and none would have made it shorter |
+| Fuzzy matching | `rapidfuzz` 3.14.6 | C-backed, and `token_set_ratio` is exactly the comparison layer 3 needs |
+| LLM | `google-genai` 3.3.0 → Gemini 3.5 Flash Lite | The cheapest model with constrained JSON decoding. The SDK's current surface is an Interactions API, **not** `generate_content` — I checked the docs instead of writing it from memory |
+| Config | PyYAML — `taxonomy.yaml`, `companies.yaml`, `fresher.yaml`, `settings.yaml` | Everything a reviewer might ask me to change lives in YAML, not in code |
+| Storage | **JSON files** | 562 posts is 500 KB. A database would add a service to deploy, a migration to run and a connection to fail, and buy nothing at this size. `jobs.json` is also exactly what the frontend bundles. Postgres is the right call at ~100k posts, not here |
+| API | FastAPI 0.163.1 + uvicorn 0.54.0 | Typed query parameters and free interactive docs at `/docs` |
+| Auth | `google-auth` 2.60.0 + Google Identity Services | Real signature verification against Google's published keys, with `aud` / `iss` / `exp` / `email_verified` checks — not a UI that merely hides content |
+| Frontend | React 19.3.1 + Vite 8.3.8, plain CSS | No component library. The whole UI is 247 KB, 77 KB gzipped |
+| Hosting | GitHub Pages for the UI, Render free tier for the API | $0 |
+| Scheduler | GitHub Actions cron | Render's free tier sleeps; Actions does not, and it is free on public repos |
+| Tests | pytest 9.0.3 — **104 tests** | None touch the network: every source test runs against a captured response |
 
-Committing the data is what refreshes the API — it reads those files from the
-repo, and the push makes the host redeploy it.
+---
 
-Failure rules it implements:
-- One source failing is logged and skipped; the run continues.
-- If the pipeline step fails, the site is still rebuilt and redeployed and the
-  API keeps serving the previously committed `jobs.json`, so the page never
-  goes blank — and the job is then marked failed so the failure is visible.
-- A post that has disappeared from its source feed simply is not in the next
-  run's output, which is how stale posts drop off.
+## 🚀 Run locally
+
+**Prerequisites:** Python 3.12+, Node 20+, and two free API keys —
+[Adzuna](https://developer.adzuna.com) and
+[Google AI Studio](https://aistudio.google.com/api-keys).
+
+```bash
+git clone https://github.com/Dbhosale146/Beep-.git
+cd Beep-
+```
+
+**1. Backend setup**
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env               # then fill in the keys
+```
+
+**2. Run the pipeline** — fetch → normalise → filter → dedup → tag → export
+
+```bash
+python -m pipeline.run                 # full run, about 3 minutes
+python -m pipeline.run --no-llm        # everything except tagging, free
+python -m pipeline.run --limit 50      # tag only 50 posts, a cheap test
+```
+
+**3. Run the tests**
+
+```bash
+python -m pytest -q                    # 104 tests, no network
+```
+
+**4. Start the API** — interactive docs at <http://127.0.0.1:8000/docs>
+
+```bash
+python -m uvicorn api.main:app --reload --port 8000
+```
+
+**5. Start the frontend** — <http://localhost:5173>
+
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
+
+The frontend works with no API running: `npm run build` copies the dataset into
+the bundle and the page searches it in the browser.
+
+**Other scripts**
+
+```bash
+cd backend
+python scripts/cost_report.py --input-price 0.30 --output-price 2.50   # measured cost
+python scripts/sample_for_eval.py                                      # draw 50 posts to hand-check
+python scripts/score_eval.py data/eval_sample.csv                      # score them
+python scripts/verify_companies.py                                     # check every board still resolves
+python scripts/check_api.py https://beep-6fn4.onrender.com             # smoke-test a deployment
+```
+
+---
+
+## ⚙️ Configuration
+
+Secrets come **only** from environment variables and GitHub Actions secrets.
+`.env` is gitignored, and no key is ever committed.
+
+**`backend/.env`** — template at `backend/.env.example`
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `ADZUNA_APP_ID` | yes | Adzuna API id |
+| `ADZUNA_APP_KEY` | yes | Adzuna API key |
+| `GEMINI_API_KEY` | yes | Google AI Studio key, used for tagging |
+| `GOOGLE_CLIENT_ID` | for auth | OAuth client id. The API checks that a token's `aud` equals this, which is what stops a token minted for another Google app being accepted |
+| `REQUIRE_AUTH` | no | `true` makes `/api/jobs`, `/api/jobs/{id}` and `/api/meta` refuse anonymous callers. Off by default so the tests need no tokens |
+| `ALLOWED_EMAILS` | no | Comma-separated allowlist. Unset means any Google account may sign in |
+| `CORS_ORIGINS` | in production | Comma-separated browser origins the API accepts. Defaults to the local Vite ports |
+
+**`frontend/.env`** — template at `frontend/.env.example`. Both are baked in at
+build time, because a static site has no server to read env vars at runtime.
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `VITE_GOOGLE_CLIENT_ID` | for auth | The same client id as the backend |
+| `VITE_API_BASE` | no | A deployed API including `/api`. **Leave it unset and the page searches the bundled dataset**, so GitHub Pages alone is a complete site |
+
+**GitHub Actions** — Settings → Secrets and variables → Actions
+
+| Kind | Names |
+|---|---|
+| Secrets | `ADZUNA_APP_ID`, `ADZUNA_APP_KEY`, `GEMINI_API_KEY` |
+| Variables | `VITE_GOOGLE_CLIENT_ID`, `API_BASE_URL` *(optional)*, `KEEPALIVE_URL` *(optional)* |
+
+---
+
+## ☁️ Deployment & refresh
+
+**Frontend — GitHub Pages.** Settings → Pages → Source: **GitHub Actions**. Add
+the secrets above, then Actions → *refresh job data* → **Run workflow**.
+
+**API — Render** (optional). Deploy `backend/` as a web service:
+
+| Setting | Value |
+|---|---|
+| Root Directory | `backend` |
+| Build command | `pip install -r requirements.txt` |
+| Start command | `uvicorn api.main:app --host 0.0.0.0 --port $PORT` |
+| Health check path | `/api/health` |
+
+Then set the repository variable `API_BASE_URL` to the service URL including
+`/api`, and the next build switches the page over.
+
+**Refresh — `.github/workflows/refresh.yml`**, cron `30 1,13 * * *`, which is
+**07:00 and 19:00 IST**: install → run 104 tests → run the pipeline → commit the
+data files → build the frontend → deploy to Pages. Committing the data is what
+refreshes the API, because it reads those files from the repo.
+
+**Why twice a day and not hourly.** Each run makes 42 Adzuna calls (7 queries ×
+6 pages) and the free tier allows roughly 2,500 calls a month. Two runs a day is
+84 a day, about 2,520 a month — the ceiling for a full fetch. This matters more
+than it looks: `fetch.py` logs a warning and continues when a call fails, so
+exceeding the quota would not fail the run, it would **quietly publish a
+near-empty page** — and Adzuna supplies 554 of the 562 published posts.
+
+**Failure rules actually implemented:**
+
+- One source failing is logged and skipped; the run continues with the rest.
+- If the pipeline step fails, the site is **still rebuilt and redeployed from the
+  previously committed `jobs.json`**, so the page never goes blank — and the job
+  is *then* marked failed, so the failure stays visible.
+- A post that has disappeared from its source feed is simply absent from the next
+  run's output. That is how stale postings drop off.
+
+A second workflow, `keepalive.yml`, pings the API's health endpoint during waking
+hours so a visitor does not land on a cold start. It is windowed rather than
+24/7, because Render grants 750 free instance hours a month per workspace and a
+service awake around the clock would consume nearly all of them.
+
+---
+
+## 🧭 Repo structure
+
+```
+backend/
+  pipeline/
+    run.py            orchestrates: fetch -> normalise -> fresher -> dedup -> tag -> export
+    run_fetch.py      calls every source, survives one source failing
+    sources/          one file per source: adzuna.py, greenhouse.py, lever.py, ashby.py
+    normalise.py      one schema, plus the India filter
+    fresher.py        keyword rules, run before any LLM spend
+    dedup.py          the three layers
+    tag.py            Gemini call, schema, validation, retry, cache, usage log
+    export.py         writes jobs.json and run_meta.json
+    config.py         YAML and .env loading
+  config/             taxonomy.yaml - companies.yaml - fresher.yaml - settings.yaml
+  prompts/            tag_v1.txt, tag_v2.txt - versioned, never inline
+  api/                main.py (search API), auth.py (Google token verification)
+  scripts/            cost_report - sample_for_eval - score_eval - verify_companies - check_api
+  tests/              104 tests, none touching the network
+  data/               jobs.json - run_meta.json - tag_cache.json - usage_log.jsonl
+
+frontend/
+  src/components/     JobCard - JobPanel - FilterBar - SearchBar - Header - LoginPage - ...
+  src/hooks/          useJobs - useAuth - useUrlState - useSaved - useCountUp
+  src/lib/            api.js (API or bundled data), search.js (in-browser search)
+  src/styles/         tokens - base - components - animations
+
+.github/workflows/    refresh.yml (the schedule), keepalive.yml
+docs/                 build_log.md - SUBMISSION.md - loom_script.md
+```
+
+### To change X, edit Y
+
+| To do this | Edit this | Then |
+|---|---|---|
+| Add or rename a **role** | `backend/config/taxonomy.yaml` → `roles:` | Re-run the pipeline. The prompt and the response schema both read this file, so they cannot drift |
+| Add a **city** or an alias | `backend/config/taxonomy.yaml` → `cities:` | The same. Aliases are matched case-insensitively as substrings |
+| Add a **company board** | `backend/config/companies.yaml` | `python scripts/verify_companies.py` to confirm it resolves |
+| Add a whole new **source** | A new file in `backend/pipeline/sources/`, registered in `run_fetch.py` | It must return the raw rows `normalise.py` expects |
+| Change the **fresher keywords** | `backend/config/fresher.yaml` | Patterns are word-bounded — see the "Internal Auditor" bug above |
+| Change the **model, batch size or description budget** | `backend/config/settings.yaml` | `llm_description_chars` drives cost directly |
+| Change the **tagging prompt** | A new file in `backend/prompts/`, then bump `prompt_version` in `settings.yaml` | The version is part of the cache key, so only the affected entries are invalidated |
+| Change **dedup strictness** | `FUZZY_THRESHOLD` and `SUBSET_THRESHOLD` in `backend/pipeline/dedup.py` | Lower means more aggressive merging. A false merge deletes a real job |
+| Change the **refresh schedule** | `.github/workflows/refresh.yml` → `cron:` | Check the Adzuna quota arithmetic above first |
+| Change **search, filters or facets** | `backend/api/main.py` | Mirror it in `frontend/src/lib/search.js`. `main.py` is the source of truth |
+| Change the **UI** | `frontend/src/components/` | Styles are plain CSS in `frontend/src/styles/` |
+
+---
+
+## ⚠️ Limitations & next steps
+
+1. **Source concentration.** 554 of 562 posts come from Adzuna. Greenhouse gave
+   4,601 raw postings and 3 survivors, because those boards are mostly US
+   companies. The fix is research — finding Indian companies that use these ATS
+   boards — not code. This is the first thing I would do next.
+2. **The Adzuna free quota caps the refresh rate** at two full fetches a day. A
+   genuinely high-frequency refresh needs either a paid plan or a thinner fetch
+   that accumulates across runs instead of replacing. I attempted the latter and
+   reverted it — see the last row of
+   [What broke](#️-what-broke--how-i-fixed-it).
+3. **The search contract exists twice**, in Python and JavaScript. It is diffed
+   across 20 query sets, but it is still duplication, and a third consumer would
+   be the point to extract it properly.
+4. **No database.** Correct at 562 posts, wrong at 100k. `jobs.json` is read
+   fully into memory when the API starts.
+5. **No description-level de-duplication.** Two genuinely different postings with
+   identical descriptions are both kept.
+6. **`is_fresher` is judged from the post text alone**, so a vague posting that
+   never states an experience level can slip through.
+7. **The suburb bug is known and unfixed** — see [Evaluation](#-evaluation). The
+   fix needs a prompt-version bump that invalidates the whole tag cache.
+8. **Accuracy is measured on 50 posts.** Enough to spot systematic errors, not
+   enough for a tight confidence interval.
+
+---
+
+## 🙏 AI tools used
+
+| Tool | Used for |
+|---|---|
+| **Gemini 3.5 Flash Lite** | The product itself — tagging role, city and `is_fresher`. The only model in the pipeline |
+| **Claude Code** | Implementation assistance: scaffolding, refactors, test writing, and this README |
+
+**Decisions that were mine, not the tool's:** official APIs over scraping;
+running keyword filters and de-duplication *before* the LLM so the expensive
+stage sees the smallest possible set; a fixed taxonomy enforced by schema rather
+than trusted from the prompt; validating in Python anyway and marking `Untagged`
+rather than guessing; three dedup layers scoped per company; JSON files instead
+of a database at this size; two data paths so the published link works without a
+server; and deleting the merge step rather than debugging it the day before
+submission.
+
+Every API shape in this project was checked against current documentation rather
+than written from memory. That is how I found that the `google-genai` SDK's
+current surface is an Interactions API and not `generate_content`.
+
+---
+
+## 📄 License
+
+MIT.
