@@ -35,6 +35,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Fail here, loudly, rather than four steps later with an error that
+      # points somewhere else. Without these secrets the pipeline step fetches
+      # nothing and writes no data -- and because that step is
+      # continue-on-error, the run limps on and dies at the deploy instead,
+      # which sends you looking in entirely the wrong place.
+      - name: Check the required secrets are set
+        env:
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          missing=""
+          for name in ADZUNA_APP_ID ADZUNA_APP_KEY GEMINI_API_KEY; do
+            # ${!name} is the value of the variable NAMED by $name.
+            if [ -z "${!name}" ]; then missing="$missing $name"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing"
+            echo "Add them at: Settings > Secrets and variables > Actions > Secrets"
+            exit 1
+          fi
+          echo "All three secrets are present."
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
